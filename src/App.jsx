@@ -1,0 +1,66 @@
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { Registro } from './pages/registro';
+import { Inicio } from './pages/Inicio';
+import { Personajes } from './pages/personajes';
+import { Galeria } from './pages/galeria';
+import { Mapas } from './pages/mapas';
+import { Login } from './pages/login';
+import fondoPiedra from './assets/piedra-musgo.jpg';
+import { Dashboard } from './pages/Dashboard';
+
+
+function App() {
+  useEffect(() => {
+    // [RÚBRICA: Advertencia de ataques Self-XSS en consola del navegador con JavaScript] (5 puntos)
+    console.log(
+      "%c¡ALTO AHÍ!", 
+      "color: red; font-size: 40px; font-weight: bold; font-family: sans-serif; text-shadow: 2px 2px 0 #000;"
+    );
+    console.log(
+      "%cEsta es una función del navegador pensada para desarrolladores. Si alguien te indicó que copiaras y pegaras algo aquí para habilitar una función de La Campana o 'hackear' la página, es una estafa y le dará a esa persona acceso a tu cuenta (Self-XSS).", 
+      "font-size: 16px; color: white; background: #1B396A; padding: 10px; border-radius: 5px; line-height: 1.5;"
+    );
+  }, []);
+  return (
+    <BrowserRouter>
+      <div 
+        className="flex flex-col min-h-screen text-gray-200"
+        style={{
+          backgroundImage: `linear-gradient(rgba(27, 57, 106, 0.85), rgba(27, 57, 106, 0.85)), url(${fondoPiedra})`,
+          backgroundAttachment: 'fixed',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <Navbar />
+
+        <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <Routes>
+            <Route path="/" element={<Inicio />} />
+            <Route path="/personajes" element={<Personajes />} />
+            
+            {/* NUEVAS RUTAS AGREGADAS AQUÍ */}
+            <Route path="/galeria" element={<Galeria />} />
+            <Route path="/mapas" element={<Mapas />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="*" element={
+              <div className="text-center mt-20">
+                <h2 className="text-[#FFD51A] text-4xl font-bold tracking-widest">404</h2>
+                <p className="text-gray-300 mt-4 text-xl">Este sendero arqueológico no existe.</p>
+              </div>
+            } />
+          </Routes>
+        </main>
+
+        <Footer />
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;

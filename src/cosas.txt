@@ -1,0 +1,3 @@
+#1B396A --color tecnm colima
+npm run dev --iniciar 
+sans-serif -- font palabras
