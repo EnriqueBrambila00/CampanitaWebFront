@@ -1,17 +1,38 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export function Login() {
   // Estados para atrapar lo que el usuario escribe
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [csrfToken, setCsrfToken] = useState('');
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
   
   const navigate = useNavigate();
 
-  // IMPORTANTE: Pon aquí la URL de tu backend en Render
+  // URL del backend principal en Render
   const API_URL = 'https://campanitaweb.onrender.com/api/login';
+
+  const CSRF_URL = 'https://campanitaweb.onrender.com/api/csrf-token';
+
+  useEffect(() => {
+    const obtenerTokenCsrf = async () => {
+      try {
+        const respuesta = await fetch(CSRF_URL, {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        const data = await respuesta.json();
+        setCsrfToken(data.csrfToken);
+      } catch (err) {
+        setError('No se pudo obtener el token CSRF');
+      }
+    };
+
+    obtenerTokenCsrf();
+  }, []);
 
   const manejarEnvio = async (e) => {
     e.preventDefault(); // Evita que la página recargue al dar enter
@@ -23,10 +44,11 @@ export function Login() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
-        // credentias: 'include' es VITAL para que el navegador acepte la cookie segura que hicimos en el backend
+        // credentials: 'include' es VITAL para que el navegador acepte y mande la cookie
         credentials: 'include', 
-        body: JSON.stringify({ correo, contrasena })
+        body: JSON.stringify({ correo, contrasena, csrfToken })
       });
 
       const data = await respuesta.json();
@@ -35,7 +57,7 @@ export function Login() {
         throw new Error(data.error || 'Error al iniciar sesión');
       }
 
-     // Si llegamos aquí, ¡el login fue exitoso!
+      // Si llegamos aquí, ¡el login fue exitoso!
       localStorage.setItem('usuarioLogueado', 'true');
       
       // Guardamos en la memoria si este usuario es el jefe
@@ -72,6 +94,8 @@ export function Login() {
         )}
 
         <form onSubmit={manejarEnvio} className="space-y-6 font-sans">
+          <input type="hidden" name="csrfToken" value={csrfToken} />
+
           <div>
             <label className="block text-gray-200 text-sm font-bold mb-2">Correo Electrónico</label>
             <input 

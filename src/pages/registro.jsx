@@ -1,17 +1,38 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 export function Registro() {
   const [nombre_usuario, setNombreUsuario] = useState('');
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [csrfToken, setCsrfToken] = useState('');
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
   
   const navigate = useNavigate();
 
-  // URL de tu backend
+  // URL del backend principal en Render
   const API_URL = 'https://campanitaweb.onrender.com/api/registro';
+
+  const CSRF_URL = 'https://campanitaweb.onrender.com/api/csrf-token';
+
+  useEffect(() => {
+    const obtenerTokenCsrf = async () => {
+      try {
+        const respuesta = await fetch(CSRF_URL, {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        const data = await respuesta.json();
+        setCsrfToken(data.csrfToken);
+      } catch (err) {
+        setError('No se pudo obtener el token CSRF');
+      }
+    };
+
+    obtenerTokenCsrf();
+  }, []);
 
   const manejarRegistro = async (e) => {
     e.preventDefault();
@@ -21,8 +42,12 @@ export function Registro() {
     try {
       const respuesta = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_usuario, correo, contrasena })
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        credentials: 'include',
+        body: JSON.stringify({ nombre_usuario, correo, contrasena, csrfToken })
       });
 
       const data = await respuesta.json();
@@ -54,6 +79,8 @@ export function Registro() {
         )}
 
         <form onSubmit={manejarRegistro} className="space-y-4 font-sans">
+          <input type="hidden" name="csrfToken" value={csrfToken} />
+
           <div>
             <label className="block text-gray-200 text-sm font-bold mb-1">Nombre de Usuario (Apodo)</label>
             <input 
