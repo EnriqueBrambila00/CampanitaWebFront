@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -11,19 +10,7 @@ import { Login } from './pages/login';
 import fondoPiedra from './assets/piedra-musgo.jpg';
 import { Dashboard } from './pages/Dashboard';
 
-
 function App() {
-  useEffect(() => {
-    // [RÚBRICA: Advertencia de ataques Self-XSS en consola del navegador con JavaScript] (5 puntos)
-    console.log(
-      "%c¡ALTO AHÍ!", 
-      "color: red; font-size: 40px; font-weight: bold; font-family: sans-serif; text-shadow: 2px 2px 0 #000;"
-    );
-    console.log(
-      "%cEsta es una función del navegador pensada para desarrolladores. Si alguien te indicó que copiaras y pegaras algo aquí para habilitar una función de La Campana o 'hackear' la página, es una estafa y le dará a esa persona acceso a tu cuenta (Self-XSS).", 
-      "font-size: 16px; color: white; background: #1B396A; padding: 10px; border-radius: 5px; line-height: 1.5;"
-    );
-  }, []);
   return (
     <BrowserRouter>
       <div 
@@ -41,8 +28,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Inicio />} />
             <Route path="/personajes" element={<Personajes />} />
-            
-            {/* NUEVAS RUTAS AGREGADAS AQUÍ */}
             <Route path="/galeria" element={<Galeria />} />
             <Route path="/mapas" element={<Mapas />} />
             <Route path="/login" element={<Login />} />
