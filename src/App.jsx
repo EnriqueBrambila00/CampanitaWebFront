@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/navbar.jsx';
 import { Footer } from './components/footer.jsx';
 import { Registro } from './pages/registro.jsx';
-import { Inicio } from './pages/Inicio.jsx';
+import { Inicio } from './pages/inicio.jsx';
 import { Personajes } from './pages/personajes.jsx';
 import { Galeria } from './pages/galeria.jsx';
 import { Mapas } from './pages/mapas.jsx';
