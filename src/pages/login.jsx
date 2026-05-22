@@ -1,67 +1,65 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export function Login() {
-  // Estados para atrapar lo que el usuario escribe
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
-  const [csrfToken, setCsrfToken] = useState('');
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
   
   const navigate = useNavigate();
 
-  // URL del backend principal en Render
-  const API_URL = 'https://campanitaweb.onrender.com/api/login';
-
-  const CSRF_URL = 'https://campanitaweb.onrender.com/api/csrf-token';
-
-  useEffect(() => {
-    const obtenerTokenCsrf = async () => {
-      try {
-        const respuesta = await fetch(CSRF_URL, {
-          method: 'GET',
-          credentials: 'include'
-        });
-
-        const data = await respuesta.json();
-        setCsrfToken(data.csrfToken);
-      } catch (err) {
-        setError('No se pudo obtener el token CSRF');
-      }
-    };
-
-    obtenerTokenCsrf();
-  }, []);
+  // URLs del backend en Render
+  const URL_BACKEND = 'https://campanitaweb.onrender.com';
+  const CSRF_URL = `${URL_BACKEND}/api/csrf-token`;
+  const API_URL = `${URL_BACKEND}/api/login`;
 
   const manejarEnvio = async (e) => {
-    e.preventDefault(); // Evita que la página recargue al dar enter
+    e.preventDefault();
     setError(null);
     setCargando(true);
 
     try {
-      const respuesta = await fetch(API_URL, {
+      // 1. SOLICITAMOS EL TOKEN CSRF JUSTO ANTES DEL LOGIN
+      const respuestaCsrf = await fetch(CSRF_URL, {
+        method: 'GET',
+        credentials: 'include' // Para que nos ponga la cookie
+      });
+
+      if (!respuestaCsrf.ok) {
+        throw new Error('No se pudo establecer la conexión segura (CSRF). Intenta recargar la página.');
+      }
+
+      const dataCsrf = await respuestaCsrf.json();
+      const tokenCsrfParaEnviar = dataCsrf.csrfToken;
+
+      // 2. ENVIAMOS EL LOGIN CON EL TOKEN FRESCO
+      const respuestaLogin = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
+          'X-CSRF-Token': tokenCsrfParaEnviar // Tu backend espera 'x-csrf-token'
         },
-        // credentials: 'include' es VITAL para que el navegador acepte y mande la cookie
-        credentials: 'include', 
-        body: JSON.stringify({ correo, contrasena, csrfToken })
+        credentials: 'include', // Para mandar la cookie que acabamos de recibir
+        body: JSON.stringify({ 
+          correo: correo, 
+          contrasena: contrasena, 
+          csrfToken: tokenCsrfParaEnviar 
+        })
       });
 
-      const data = await respuesta.json();
+      const dataLogin = await respuestaLogin.json();
 
-      if (!respuesta.ok) {
-        throw new Error(data.error || 'Error al iniciar sesión');
+      if (!respuestaLogin.ok) {
+        throw new Error(dataLogin.error || 'Error al iniciar sesión');
       }
 
       // Si llegamos aquí, ¡el login fue exitoso!
       localStorage.setItem('usuarioLogueado', 'true');
       
       // Guardamos en la memoria si este usuario es el jefe
-      if (data.esAdmin) {
+      if (dataLogin.esAdmin) {
         localStorage.setItem('esAdmin', 'true');
       } else {
         localStorage.removeItem('esAdmin');
@@ -69,7 +67,6 @@ export function Login() {
       
       navigate('/');
       window.location.reload();
-     
 
     } catch (err) {
       setError(err.message);
@@ -94,8 +91,7 @@ export function Login() {
         )}
 
         <form onSubmit={manejarEnvio} className="space-y-6 font-sans">
-          <input type="hidden" name="csrfToken" value={csrfToken} />
-
+          
           <div>
             <label className="block text-gray-200 text-sm font-bold mb-2">Correo Electrónico</label>
             <input 
@@ -127,6 +123,7 @@ export function Login() {
           >
             {cargando ? 'VERIFICANDO...' : 'INICIAR SESIÓN'}
           </button>
+          
           <button 
             type="button" 
             onClick={() => navigate('/registro')}
