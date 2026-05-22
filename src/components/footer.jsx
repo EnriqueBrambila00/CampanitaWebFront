@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 
+
 export function Footer() {
   return (
     <footer className="bg-[#1B396A] lg:grid lg:grid-cols-5 border-t border-[#023326]">
       {/* Imagen lateral */}
       <div className="relative block h-32 lg:col-span-2 lg:h-full">
         <img 
-          src="./src/assets/campanita.jpg" 
+          src="https://i.postimg.cc/qqxTY9xF/campanita.jpg" 
           alt="Textura de piedra antigua" 
           className="absolute inset-0 h-full w-full object-cover opacity-80" 
         />
