@@ -4,37 +4,52 @@ import logoPiramide from '../assets/piramide.png';
 
 export function Navbar() {
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
-  const navigate = useNavigate(); // Inicializamos la herramienta para cambiar de página
+  const [menuAbierto, setMenuAbierto] = useState(false); // NUEVO: Controla el menú de celular
+  const navigate = useNavigate();
   
   const usuarioAutenticado = localStorage.getItem('usuarioLogueado') === 'true';
   const esAdmin = localStorage.getItem('esAdmin') === 'true';
   
   const manejarCerrarSesion = () => {
-    localStorage.removeItem('usuarioLogueado'); // Destruimos la llave
+    localStorage.removeItem('usuarioLogueado');
     localStorage.removeItem('esAdmin');
-    setMenuPerfilAbierto(false); // Cerramos el menú
-    navigate('/login'); // Te mandamos a la pantalla de login
-    window.location.reload(); // Refrescamos rápido para actualizar la barra
+    setMenuPerfilAbierto(false);
+    setMenuAbierto(false); // Cerramos el menú de celular si estaba abierto
+    navigate('/login');
+    window.location.reload();
   };
 
+  const cerrarMenuMobile = () => setMenuAbierto(false);
+
   return (
-    <header className="bg-[#1B396A] border-b border-[#807E82]/30 shadow-lg">
+    // Agregué 'relative z-50' para que el menú desplegable del celular quede por encima de todo
+    <header className="bg-[#1B396A] border-b border-[#807E82]/30 shadow-lg relative z-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           
           {/* Logo / Título */}
-          <div className="flex-1 md:flex md:items-center">
-            <Link className="flex items-center gap-3 transition hover:opacity-80" to="/">
-              <img src={logoPiramide} alt="Logo La Campana" className="h-12 w-auto" />
-              <span className="font-['PixelSplitter'] text-[#FFD51A] text-2xl tracking-widest uppercase">
+          <div className="flex-1 flex items-center">
+            <Link className="flex items-center gap-3 transition hover:opacity-80" to="/" onClick={cerrarMenuMobile}>
+              <img src={logoPiramide} alt="Logo La Campana" className="h-10 md:h-12 w-auto" />
+              <span className="font-['PixelSplitter'] text-[#FFD51A] text-xl md:text-2xl tracking-widest uppercase">
                 La Campanita
               </span>
             </Link>
           </div>
 
-          {/* Menú principal de navegación */}
-          <div className="md:flex md:items-center md:gap-12">
-            <nav aria-label="Global" className="hidden md:block">
+          {/* BOTÓN DE HAMBURGUESA (SOLO EN CELULARES) */}
+          <div className="md:hidden flex items-center">
+            <button 
+              onClick={() => setMenuAbierto(!menuAbierto)}
+              className="text-[#FFD51A] hover:text-white focus:outline-none text-3xl"
+            >
+              {menuAbierto ? '✖' : '☰'}
+            </button>
+          </div>
+
+          {/* MENÚ PRINCIPAL DE NAVEGACIÓN (OCULTO EN CELULARES, VISIBLE EN ESCRITORIO) */}
+          <div className="hidden md:flex md:items-center md:gap-12">
+            <nav aria-label="Global">
               <ul className="flex items-center gap-6 text-sm font-['PixelSplitter'] tracking-widest">
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/">Inicio</Link></li>
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/personajes">Personajes</Link></li>
@@ -51,8 +66,8 @@ export function Navbar() {
               </ul>
             </nav>
 
-            <div className="relative hidden md:block">
-              {/* RENDERIZADO CONDICIONAL: Si está logueado muestra perfil, si no, botón de Login */}
+            <div className="relative">
+              {/* RENDERIZADO CONDICIONAL PERFIL ESCRITORIO */}
               {usuarioAutenticado ? (
                 <>
                   <button 
@@ -66,11 +81,9 @@ export function Navbar() {
                   {menuPerfilAbierto && (
                     <div className="absolute end-0 z-10 mt-2 w-48 rounded-md border border-[#1B396A] bg-white shadow-xl font-['PixelSplitter'] text-xs tracking-wider" role="menu">
                       <div className="p-2">
-                        <Link to="/perfil" className="block rounded-lg px-4 py-3 text-[#1B396A] hover:bg-gray-100" role="menuitem">
+                        <Link to="/perfil" className="block rounded-lg px-4 py-3 text-[#1B396A] hover:bg-gray-100" role="menuitem" onClick={() => setMenuPerfilAbierto(false)}>
                           MI PERFIL
                         </Link>
-                        
-                        {/* AQUÍ SE CONECTÓ LA FUNCIÓN AL BOTÓN */}
                         <button 
                           type="button" 
                           onClick={manejarCerrarSesion}
@@ -82,7 +95,6 @@ export function Navbar() {
                           </svg>
                           CERRAR SESIÓN
                         </button>
-
                       </div>
                     </div>
                   )}
@@ -99,6 +111,43 @@ export function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* ========================================================= */}
+      {/* MENÚ DESPLEGABLE PARA CELULARES (DISEÑO ADAPTADO) */}
+      {/* ========================================================= */}
+      {menuAbierto && (
+        <div className="md:hidden bg-[#1B396A] border-b border-[#807E82]/30 absolute w-full left-0 top-16 shadow-2xl font-['PixelSplitter']">
+          <div className="px-4 pt-4 pb-6 space-y-5 flex flex-col">
+            <Link to="/" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">INICIO</Link>
+            <Link to="/personajes" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">PERSONAJES</Link>
+            <Link to="/galeria" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">GALERÍA</Link>
+            <Link to="/mapas" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">MAPAS</Link>
+            
+            {esAdmin && (
+              <Link to="/dashboard" onClick={cerrarMenuMobile} className="block text-[#FFD51A] hover:text-white tracking-widest text-center text-sm">DASHBOARD</Link>
+            )}
+
+            {/* ZONA DE AUTENTICACIÓN MÓVIL */}
+            <div className="pt-4 border-t border-white/20 flex flex-col items-center gap-4">
+              {usuarioAutenticado ? (
+                <>
+                  <Link to="/perfil" onClick={cerrarMenuMobile} className="text-white hover:text-[#FFD51A] tracking-widest text-sm">MI PERFIL</Link>
+                  <button onClick={manejarCerrarSesion} className="text-red-400 hover:text-red-300 tracking-widest text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="size-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"></path>
+                    </svg>
+                    CERRAR SESIÓN
+                  </button>
+                </>
+              ) : (
+                <Link to="/login" onClick={cerrarMenuMobile} className="bg-[#FFD51A] text-[#1B396A] px-5 py-3 rounded hover:bg-white tracking-widest w-3/4 text-center text-sm">
+                  INGRESAR
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
