@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Navbar } from './components/Navbar';
-import { Footer } from './components/Footer';
-import { Registro } from './pages/registro';
-import { Inicio } from './pages/Inicio';
-import { Personajes } from './pages/personajes';
-import { Galeria } from './pages/galeria';
-import { Mapas } from './pages/mapas';
-import { Login } from './pages/login';
+import { Navbar } from './components/navbar.jsx';
+import { Footer } from './components/footer.jsx';
+import { Registro } from './pages/registro.jsx';
+import { Inicio } from './pages/Inicio.jsx';
+import { Personajes } from './pages/personajes.jsx';
+import { Galeria } from './pages/galeria.jsx';
+import { Mapas } from './pages/mapas.jsx';
+import { Login } from './pages/login.jsx';
 import fondoPiedra from './assets/piedra-musgo.jpg';
-import { Dashboard } from './pages/Dashboard';
+import { Dashboard } from './pages/Dashboard.jsx';
 
 function App() {
   return (
