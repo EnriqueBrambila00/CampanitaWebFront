@@ -9,6 +9,7 @@ import { Mapas } from './pages/mapas.jsx';
 import { Login } from './pages/login.jsx';
 import fondoPiedra from './assets/piedra-musgo.jpg';
 import { Dashboard } from './pages/Dashboard.jsx';
+import { Perfil } from './pages/perfil.jsx';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/perfil" element={<Perfil />} />
             <Route path="*" element={
               <div className="text-center mt-20">
                 <h2 className="text-[#FFD51A] text-4xl font-bold tracking-widest">404</h2>
