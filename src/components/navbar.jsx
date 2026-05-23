@@ -1,11 +1,35 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate,useLocation } from 'react-router-dom';
 import logoPiramide from '../assets/piramide.png';
 
 export function Navbar() {
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false); // NUEVO: Controla el menú de celular
   const navigate = useNavigate();
+  const location = useLocation(); // <--- NUEVO: Para leer la URL actual
+
+  // ========================================================
+  // NUEVO: INTERCEPTOR DE LOGIN DE GOOGLE
+  // ========================================================
+  useEffect(() => {
+    // Revisamos si la URL tiene el parámetro "?oauth=google"
+    const parametrosUrl = new URLSearchParams(location.search);
+    
+    if (parametrosUrl.get('oauth') === 'google') {
+      // 1. Le decimos a React que ya estamos logueados
+      localStorage.setItem('usuarioLogueado', 'true');
+      
+      // 2. Si el backend nos mandó a la ruta /dashboard, es porque somos administradores
+      if (location.pathname.includes('/dashboard')) {
+        localStorage.setItem('esAdmin', 'true');
+      }
+
+      // 3. Limpiamos la URL para que no se vea el "?oauth=google" y recargamos el menú
+      navigate(location.pathname, { replace: true });
+      setTimeout(() => window.location.reload(), 100);
+    }
+  }, [location, navigate]);
+  // ========================================================
   
   const usuarioAutenticado = localStorage.getItem('usuarioLogueado') === 'true';
   const esAdmin = localStorage.getItem('esAdmin') === 'true';
