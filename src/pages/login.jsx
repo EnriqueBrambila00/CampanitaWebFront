@@ -128,12 +128,25 @@ export function Login() {
             {cargando ? 'VERIFICANDO...' : 'INICIAR SESIÓN'}
           </button>
 
+          {/* Separador visual */}
+          <div className="flex items-center my-6">
+            <div className="flex-grow border-t border-gray-500"></div>
+            <span className="flex-shrink-0 mx-4 text-gray-400 text-sm font-['PixelSplitter'] tracking-widest">O</span>
+            <div className="flex-grow border-t border-gray-500"></div>
+          </div>
+
+          {/* Botón de Google */}
           <button 
             type="button" 
-            onClick={iniciarSesionGoogle}
-            className="w-full bg-white text-[#1B396A] font-['PixelSplitter'] font-bold py-3 px-4 rounded transition-transform tracking-widest mt-2 hover:bg-gray-200 hover:scale-105"
+            onClick={() => window.location.href = 'https://campanitaweb.onrender.com/api/auth/google'}
+            className="w-full bg-white text-gray-700 font-bold py-3 px-4 rounded transition-transform mt-2 hover:bg-gray-100 hover:scale-105 flex items-center justify-center gap-3 shadow-md"
           >
-            INICIAR SESIÓN CON GOOGLE
+            <img 
+              src="https://www.svgrepo.com/show/475656/google-color.svg" 
+              alt="Google Logo" 
+              className="w-5 h-5"
+            />
+            CONTINUAR CON GOOGLE
           </button>
           
           <button 
