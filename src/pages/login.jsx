@@ -12,7 +12,8 @@ export function Login() {
   // URLs del backend en Render
   const URL_BACKEND = 'https://campanitaweb.onrender.com';
   const CSRF_URL = `${URL_BACKEND}/api/csrf-token`;
-  const API_URL = `${URL_BACKEND}/api/login`;
+  const LOGIN_URL = `${URL_BACKEND}/api/login`;
+  const GOOGLE_AUTH_URL = `${URL_BACKEND}/api/auth/google`;
 
   const manejarEnvio = async (e) => {
     e.preventDefault();
@@ -34,7 +35,7 @@ export function Login() {
       const tokenCsrfParaEnviar = dataCsrf.csrfToken;
 
       // 2. ENVIAMOS EL LOGIN CON EL TOKEN FRESCO
-      const respuestaLogin = await fetch(API_URL, {
+      const respuestaLogin = await fetch(LOGIN_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,6 +73,10 @@ export function Login() {
     } finally {
       setCargando(false);
     }
+  };
+
+  const iniciarSesionGoogle = () => {
+    window.location.href = GOOGLE_AUTH_URL;
   };
 
   return (
@@ -121,6 +126,14 @@ export function Login() {
             className={`w-full bg-[#FFD51A] text-[#1B396A] font-['PixelSplitter'] font-bold py-3 px-4 rounded transition-transform tracking-widest mt-4 ${cargando ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-400 hover:scale-105'}`}
           >
             {cargando ? 'VERIFICANDO...' : 'INICIAR SESIÓN'}
+          </button>
+
+          <button 
+            type="button" 
+            onClick={iniciarSesionGoogle}
+            className="w-full bg-white text-[#1B396A] font-['PixelSplitter'] font-bold py-3 px-4 rounded transition-transform tracking-widest mt-2 hover:bg-gray-200 hover:scale-105"
+          >
+            INICIAR SESIÓN CON GOOGLE
           </button>
           
           <button 
