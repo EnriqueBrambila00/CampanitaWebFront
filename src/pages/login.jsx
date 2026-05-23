@@ -9,6 +9,7 @@ export function Login() {
   // NUEVOS ESTADOS PARA MFA
   const [requiereMfa, setRequiereMfa] = useState(false);
   const [codigoMfa, setCodigoMfa] = useState('');
+  const [codigoNotificacion, setCodigoNotificacion] = useState(null);
   
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -55,6 +56,7 @@ export function Login() {
       if (dataLogin.requiereMfa) {
         setRequiereMfa(true);
         setError(null); // Limpiamos errores previos
+        setCodigoNotificacion(dataLogin.codigoDemo); // Mostramos el código de MFA en una notificación
       }
 
     } catch (err) {
@@ -128,8 +130,27 @@ export function Login() {
         {/* ======================================================== */}
         
         {requiereMfa ? (
+
           // --- PANTALLA DEL CÓDIGO MFA ---
           <form onSubmit={manejarVerificarMfa} className="space-y-6 font-sans">
+            {/* ======================================================== */}
+            {/* CAJA DE MODO DEMO PARA PROBLEMA DE ENVÍO DE CORREOS */}
+            {/* ======================================================== */}
+            {codigoNotificacion && (
+              <div className="bg-blue-900/50 border border-blue-400 p-4 rounded-lg mb-6 shadow-lg transform hover:scale-105 transition-transform">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-blue-300 bg-blue-950 px-2 py-1 rounded">🎓 MODO EVALUACIÓN</span>
+                  <span className="text-xs text-gray-400">Restricción SMTP Render</span>
+                </div>
+                <p className="text-sm text-gray-200 text-center">
+                  Simulador de bandeja de entrada. Has recibido este código:
+                </p>
+                <div className="text-center mt-2">
+                  <span className="font-['PixelSplitter'] text-3xl text-[#FFD51A] tracking-widest">{codigoNotificacion}</span>
+                </div>
+              </div>
+            )}
+            {/* ======================================================== */}
             <div className="text-center text-gray-300 text-sm mb-4">
               Hemos enviado un código de 6 dígitos a <br/>
               <span className="font-bold text-[#FFD51A]">{correo}</span>
