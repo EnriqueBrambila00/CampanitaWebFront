@@ -30,6 +30,35 @@ export function Navbar() {
     }
   }, [location, navigate]);
   // ========================================================
+  // ========================================================
+  // CAZAFANTASMAS DE SESIONES EXPIRADAS
+  // ========================================================
+  useEffect(() => {
+    const verificarSesionViva = async () => {
+      // Si React cree que estamos logueados, vamos a preguntarle al backend si es cierto
+      if (localStorage.getItem('usuarioLogueado') === 'true') {
+        try {
+          // Hacemos un "ping" silencioso a una ruta protegida (la del perfil sirve perfecto)
+          const res = await fetch('https://campanitaweb.onrender.com/api/perfil/telefono', {
+            credentials: 'include' // Importante para enviar la cookie a ver si aún sirve
+          });
+
+          // Si el backend nos batea (401 Unauthorized), significa que la cookie ya expiró
+          if (res.status === 401) {
+            console.log("Sesión expirada detectada. Limpiando frontend...");
+            localStorage.removeItem('usuarioLogueado');
+            localStorage.removeItem('esAdmin');
+            window.location.reload(); // Recargamos la página para limpiar la Navbar visualmente
+          }
+        } catch (error) {
+          console.error("No se pudo verificar la sesión de fondo");
+        }
+      }
+    };
+
+    verificarSesionViva();
+  }, []);
+  // ========================================================
   
   const usuarioAutenticado = localStorage.getItem('usuarioLogueado') === 'true';
   const esAdmin = localStorage.getItem('esAdmin') === 'true';
