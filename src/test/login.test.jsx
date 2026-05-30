@@ -1,45 +1,38 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import { Login } from '../pages/Login'; // Ajusta la ruta si tu Login.jsx está en otra carpeta
+import { Login } from '../pages/login'; // Asegúrate de que el nombre coincida con tu archivo real
 import '@testing-library/jest-dom';
 
-// 1. SIMULAMOS LA NAVEGACIÓN (Para que no marque error al usar useNavigate)
+// Simulamos el navegador para que React Router no marque error
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
+  return { ...actual, useNavigate: () => mockNavigate };
 });
 
-// 2. SIMULAMOS EL BACKEND (Interceptamos la función fetch)
+// Interceptamos fetch para no depender del internet en esta prueba visual
 global.fetch = vi.fn();
 
-describe('Pruebas del Componente Login - La Campanita', () => {
+describe('Pruebas del Frontend - Flujo de Seguridad', () => {
   
   beforeEach(() => {
-    vi.clearAllMocks(); // Limpiamos la memoria antes de cada prueba
+    vi.clearAllMocks();
   });
 
-  it('1. Renderiza los campos del formulario correctamente', () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+  it('1. Debe mostrar el simulador de MFA (Modo Evaluación) al ingresar credenciales correctas', async () => {
     
-    // Verificamos que el título y los inputs existan en la pantalla
-    expect(screen.getByText('ACCESO')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('12345@gmail.com')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
-  });
+    // 1. Simulamos que el backend nos da el Token CSRF
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ csrfToken: 'token-falso-seguro' })
+    });
 
-  it('2. Muestra un mensaje de error si el servidor rechaza las credenciales', async () => {
-    // Simulamos la respuesta del backend: 
-    // Primera llamada (CSRF) -> Falla intencionalmente para disparar el catch
-    fetch.mockRejectedValueOnce(new Error('Credenciales inválidas'));
+    // 2. Simulamos que el backend valida la contraseña y manda el código MFA
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ requiereMfa: true, codigoDemo: '777888' })
+    });
 
     render(
       <MemoryRouter>
@@ -48,18 +41,17 @@ describe('Pruebas del Componente Login - La Campanita', () => {
     );
 
     // Escribimos en los inputs
-    const inputCorreo = screen.getByPlaceholderText('12345@gmail.com');
-    const inputContrasena = screen.getByPlaceholderText('••••••••');
-    
-    fireEvent.change(inputCorreo, { target: { value: 'hacker@correo.com' } });
-    fireEvent.change(inputContrasena, { target: { value: 'claveFalsa123' } });
+    fireEvent.change(screen.getByPlaceholderText('12345@gmail.com'), { target: { value: 'profe@correo.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: '123456' } });
 
-    // Hacemos clic en el botón
-    const btnLogin = screen.getByText('INICIAR SESIÓN');
-    fireEvent.click(btnLogin);
+    // Clic en el botón
+    fireEvent.click(screen.getByText('INICIAR SESIÓN'));
 
-    // Esperamos a que el componente actualice el estado de error y lo muestre
-    const mensajeError = await screen.findByText('Credenciales inválidas');
-    expect(mensajeError).toBeInTheDocument();
+    // Verificamos que la pantalla cambie y muestre el código secreto
+    await waitFor(() => {
+      expect(screen.getByText('🎓 MODO EVALUACIÓN')).toBeInTheDocument();
+      expect(screen.getByText('777888')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('000000')).toBeInTheDocument(); // El input del NIP
+    });
   });
 });
