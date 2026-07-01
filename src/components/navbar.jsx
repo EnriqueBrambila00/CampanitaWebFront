@@ -108,9 +108,11 @@ export function Navbar() {
             <nav aria-label="Global">
               <ul className="flex items-center gap-6 text-sm font-['PixelSplitter'] tracking-widest">
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/">Inicio</Link></li>
+                <li><Link className="text-white transition hover:text-[#FFD51A]" to="/">Noticias</Link></li>
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/personajes">Personajes</Link></li>
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/galeria">Galería</Link></li>
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/mapas">Mapas</Link></li>
+                <li><Link className="text-white transition hover:text-[#FFD51A]" to="/contacto">Descargar</Link></li>
                 {/* BOTÓN SECRETO PARA EL ADMINISTRADOR */}
                 {esAdmin && (
                   <li>
