@@ -108,11 +108,11 @@ export function Navbar() {
             <nav aria-label="Global">
               <ul className="flex items-center gap-6 text-sm font-['PixelSplitter'] tracking-widest">
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/">Inicio</Link></li>
-                <li><Link className="text-white transition hover:text-[#FFD51A]" to="/">Noticias</Link></li>
+                <li><Link className="text-white transition hover:text-[#FFD51A]" to="/noticias">Noticias</Link></li>
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/personajes">Personajes</Link></li>
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/galeria">Galería</Link></li>
                 <li><Link className="text-white transition hover:text-[#FFD51A]" to="/mapas">Mapas</Link></li>
-                <li><Link className="text-white transition hover:text-[#FFD51A]" to="/contacto">Descargar</Link></li>
+                <li><Link className="text-white transition hover:text-[#FFD51A]" to="/descargar">Descargar</Link></li>
                 {/* BOTÓN SECRETO PARA EL ADMINISTRADOR */}
                 {esAdmin && (
                   <li>
@@ -177,9 +177,11 @@ export function Navbar() {
         <div className="md:hidden bg-[#1B396A] border-b border-[#807E82]/30 absolute w-full left-0 top-16 shadow-2xl font-['PixelSplitter']">
           <div className="px-4 pt-4 pb-6 space-y-5 flex flex-col">
             <Link to="/" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">INICIO</Link>
+            <Link to="/noticias" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">NOTICIAS</Link>
             <Link to="/personajes" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">PERSONAJES</Link>
             <Link to="/galeria" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">GALERÍA</Link>
             <Link to="/mapas" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">MAPAS</Link>
+            <Link to="/descargar" onClick={cerrarMenuMobile} className="block text-white hover:text-[#FFD51A] tracking-widest text-center text-sm">DESCARGAR</Link>
             
             {esAdmin && (
               <Link to="/dashboard" onClick={cerrarMenuMobile} className="block text-[#FFD51A] hover:text-white tracking-widest text-center text-sm">DASHBOARD</Link>
