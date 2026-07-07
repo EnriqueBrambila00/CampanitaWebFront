@@ -8,6 +8,8 @@ export function Dashboard() {
   const [personajes, setPersonajes] = useState([]);
   const [galeria, setGaleria] = useState([]);
   const [mapas, setMapas] = useState([]);
+  const [noticias, setNoticias] = useState([]);
+  const [editandoNoticiaId, setEditandoNoticiaId] = useState(null);
   
   // Formulario genérico (reutilizado para las 3 secciones)
   const [nombre, setNombre] = useState('');
@@ -19,8 +21,9 @@ export function Dashboard() {
     if (seccionActiva === 'personajes') obtenerDatos('personajes', setPersonajes);
     if (seccionActiva === 'galeria') obtenerDatos('galeria', setGaleria);
     if (seccionActiva === 'mapas') obtenerDatos('mapas', setMapas);
+    if (seccionActiva === 'noticias') obtenerDatos('noticias', setNoticias);
     // Limpiamos los campos al cambiar de pestaña
-    setNombre(''); setDescripcion(''); setImagenUrl(''); setMensaje('');
+    setNombre(''); setDescripcion(''); setImagenUrl(''); setMensaje(''); setEditandoNoticiaId(null);
   }, [seccionActiva]);
 
   // ==========================================
@@ -63,9 +66,53 @@ export function Dashboard() {
       });
       if (res.ok) {
         setMensaje('🗑️ Elemento eliminado.');
+        if (endpoint === 'noticias' && id === editandoNoticiaId) cancelarEdicionNoticia();
         obtenerDatos(endpoint, setEstado);
       }
     } catch (err) { console.error(err); }
+  };
+
+  const manejarGuardarNoticia = async (e) => {
+    e.preventDefault();
+    setMensaje('');
+    try {
+      const url = editandoNoticiaId 
+        ? `${URL_BACKEND}/api/admin/noticias/${editandoNoticiaId}`
+        : `${URL_BACKEND}/api/admin/noticias`;
+      const metodo = editandoNoticiaId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          titulo: nombre,
+          contenido: descripcion,
+          imagen_url: imagenUrl || null
+        })
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al guardar la noticia');
+      }
+      setMensaje(editandoNoticiaId ? '✅ ¡Noticia actualizada con éxito!' : '✅ ¡Noticia creada con éxito!');
+      setNombre(''); setDescripcion(''); setImagenUrl(''); setEditandoNoticiaId(null);
+      obtenerDatos('noticias', setNoticias);
+    } catch (err) { setMensaje(`❌ Error: ${err.message}`); }
+  };
+
+  const iniciarEdicionNoticia = (item) => {
+    setEditandoNoticiaId(item.id_noticia);
+    setNombre(item.titulo || '');
+    setDescripcion(item.contenido || '');
+    setImagenUrl(item.imagen_url || '');
+    setMensaje('✏️ Modo edición activado. Modifica los campos y guarda.');
+  };
+
+  const cancelarEdicionNoticia = () => {
+    setEditandoNoticiaId(null);
+    setNombre(''); setDescripcion(''); setImagenUrl('');
+    setMensaje('');
   };
 
   // ==========================================
@@ -76,6 +123,7 @@ export function Dashboard() {
     { id: 'personajes', nombre: 'Personajes', icono: '🗿' },
     { id: 'mapas', nombre: 'Mapas', icono: '🗺️' },
     { id: 'galeria', nombre: 'Galería', icono: '🖼️' },
+    { id: 'noticias', nombre: 'Noticias', icono: '📰' },
   ];
 
   return (
@@ -174,6 +222,128 @@ export function Dashboard() {
                       <td className="p-3 text-center"><button onClick={() => manejarBorrar(item.id_imagen, 'galeria', setGaleria)} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs font-bold">🗑️ Borrar</button></td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SECCIÓN NOTICIAS */}
+        {seccionActiva === 'noticias' && (
+          <div className="space-y-8">
+            <h3 className="text-3xl font-['PixelSplitter'] text-[#FFD51A] tracking-wider mb-6 uppercase">
+              GESTIÓN DE NOTICIAS
+            </h3>
+            
+            {mensaje && <div className="bg-white/10 border border-[#FFD51A] p-3 rounded text-center font-bold text-[#FFD51A]">{mensaje}</div>}
+            
+            {/* FORMULARIO NOTICIAS */}
+            <form 
+              onSubmit={manejarGuardarNoticia} 
+              className="bg-black/20 p-6 rounded border border-white/10 space-y-4"
+            >
+              <h4 className="text-xl font-bold text-white mb-2">
+                {editandoNoticiaId ? '✏️ Editar Noticia' : '✨ Publicar Nueva Noticia'}
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm mb-1">Título (máx. 150 caracteres)</label>
+                  <input 
+                    type="text" 
+                    required 
+                    maxLength={150}
+                    value={nombre} 
+                    onChange={(e) => setNombre(e.target.value)} 
+                    className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"
+                    placeholder="Ej. Lanzamiento Beta v0.8.5"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">URL de la Imagen (Opcional)</label>
+                  <input 
+                    type="url" 
+                    value={imagenUrl} 
+                    onChange={(e) => setImagenUrl(e.target.value)} 
+                    className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"
+                    placeholder="https://..."
+                  />
+                  {imagenUrl && (
+                    <div className="mt-2 p-2 bg-black/40 rounded border border-white/10 flex items-center gap-3">
+                      <img src={imagenUrl} alt="Previsualización" className="w-12 h-12 object-cover rounded border border-[#FFD51A]" onError={(e) => { e.target.src = 'https://via.placeholder.com/150/1B396A/FFD51A?text=Error'; }} />
+                      <span className="text-xs text-gray-300">Previsualización activa</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Contenido de la Noticia</label>
+                <textarea 
+                  required 
+                  value={descripcion} 
+                  onChange={(e) => setDescripcion(e.target.value)} 
+                  rows="4" 
+                  className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"
+                  placeholder="Escribe el contenido completo..."
+                ></textarea>
+              </div>
+              <div className="flex gap-4">
+                <button type="submit" className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded font-bold transition-colors">
+                  {editandoNoticiaId ? '💾 Guardar Cambios' : '🚀 Publicar Noticia'}
+                </button>
+                {editandoNoticiaId && (
+                  <button type="button" onClick={cancelarEdicionNoticia} className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-2 rounded font-bold transition-colors">
+                    ✕ Cancelar Edición
+                  </button>
+                )}
+              </div>
+            </form>
+
+            {/* TABLA NOTICIAS */}
+            <div className="bg-black/20 rounded border border-white/10 overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#0D2144] border-b border-white/10">
+                    <th className="p-3">Miniatura</th>
+                    <th className="p-3">Título</th>
+                    <th className="p-3">Fecha</th>
+                    <th className="p-3 text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {noticias.map((item) => (
+                    <tr key={item.id_noticia} className="border-b border-white/5 hover:bg-white/5">
+                      <td className="p-3">
+                        <img 
+                          src={item.imagen_url || 'https://via.placeholder.com/150/1B396A/FFD51A?text=Sin+Img'} 
+                          alt="miniatura" 
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      </td>
+                      <td className="p-3 font-bold">{item.titulo}</td>
+                      <td className="p-3 text-sm text-gray-300">
+                        {new Date(item.fecha_publicacion).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </td>
+                      <td className="p-3 text-center space-x-2">
+                        <button 
+                          onClick={() => iniciarEdicionNoticia(item)} 
+                          className="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-xs font-bold transition-colors"
+                        >
+                          ✏️ Editar
+                        </button>
+                        <button 
+                          onClick={() => manejarBorrar(item.id_noticia, 'noticias', setNoticias)} 
+                          className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs font-bold transition-colors"
+                        >
+                          🗑️ Borrar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {noticias.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="p-6 text-center text-gray-400 italic">No hay noticias publicadas aún.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
