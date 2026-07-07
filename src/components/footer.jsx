@@ -5,15 +5,15 @@ export function Footer() {
     <footer className="bg-[#1B396A] border-t border-[#023326] text-gray-300 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
-          
+
           {/* Logo y Contacto (Ocupa 2 columnas) */}
           <div className="md:col-span-2 flex flex-col sm:flex-row gap-5 items-start">
             <div className="shrink-0">
-               <img 
-                 src="https://i.postimg.cc/qqxTY9xF/campanita.jpg" 
-                 alt="Campanita" 
-                 className="w-16 h-16 rounded-xl object-cover border border-[#023326] shadow-lg opacity-90 transition-opacity hover:opacity-100" 
-               />
+              <img
+                src="https://i.postimg.cc/qqxTY9xF/campanita.jpg"
+                alt="Campanita"
+                className="w-16 h-16 rounded-xl object-cover border border-[#023326] shadow-lg opacity-90 transition-opacity hover:opacity-100"
+              />
             </div>
             <div>
               <p className="text-[10px] tracking-wider text-gray-400 uppercase font-bold">Proyecto</p>

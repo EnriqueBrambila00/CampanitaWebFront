@@ -1,6 +1,42 @@
+import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export function Inicio() {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    // Observador para reproducir el video cuando esté visible (estilo Facebook)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // Si al menos el 50% del video está visible en pantalla
+          if (entry.isIntersecting) {
+            videoElement.play().catch((err) => {
+              console.log("Autoplay silenciado requerido o bloqueado:", err);
+            });
+          } else {
+            // Si se sale de la vista, se pausa automáticamente
+            if (!videoElement.paused) {
+              videoElement.pause();
+            }
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(videoElement);
+
+    return () => {
+      if (videoElement) {
+        observer.unobserve(videoElement);
+      }
+    };
+  }, []);
+
   return (
     <div className="flex flex-col font-sans mb-10 overflow-x-hidden">
 
@@ -20,54 +56,6 @@ export function Inicio() {
             className="h-20 md:h-24 w-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-transform duration-300 hover:scale-110"
           />
         </div>
-
-        {/* ============================================================ */}
-        {/* MASCOTAS NUEVAS (Simétricas, pegadas a las orillas y altas) */}
-        {/* ============================================================ */}
-
-        {/* Jaguar Izquierdo */}
-        {/* <img
-            src="https://i.postimg.cc/ZRJ0d4q3/Diseno-sin-titulo-1-removebg-preview.png"
-            alt="Mascota Jaguar Izquierda"
-            className="
-              hidden xl:block
-              absolute
-              left-[-40px]
-              2xl:left-[-10px]
-              top-1/2
-              -translate-y-1/2
-              h-[520px]
-              2xl:h-[620px]
-              w-auto
-              object-contain
-              opacity-90
-              z-10
-              drop-shadow-[0_0_20px_rgba(255,213,26,0.25)]
-            "
-          /> */}
-
-        {/* Jaguar Derecho */}
-        {/* <img
-            src="https://i.postimg.cc/bYCdZXfk/Diseno-sin-titulo-2-removebg-preview.png"
-            alt="Mascota Jaguar Derecha"
-            className="
-              hidden xl:block
-              absolute
-              right-[-40px]
-              2xl:right-[-10px]
-              top-1/2
-              -translate-y-1/2
-              h-[520px]
-              2xl:h-[620px]
-              w-auto
-              object-contain
-              opacity-90
-              z-10
-              drop-shadow-[0_0_20px_rgba(255,213,26,0.25)]
-            "
-          /> */}
-
-        {/* ============================================================ */}
 
         {/* Contenido Central */}
         <div className="relative z-20 text-center max-w-4xl mx-auto">
@@ -131,17 +119,34 @@ export function Inicio() {
             Conoce a entidades milenarias y descubre una historia rica basada en la mitología prehispánica de la región occidente de México.
           </p>
         </div>
-
-<br />
       </section>
 
-        <br />
-      
-      <div className="flex items-center justify-center">
-        <video src="https://res.cloudinary.com/kdpzubj7/video/upload/v1783098678/la_campanita_zvxt8n.mp4" controls width="640" height="480" allow="autoplay; encrypted-media" allowfullscreen></video>
-        
+      {/* SECCIÓN DE VIDEO CON AUTOPLAY AL HACER SCROLL (ESTILO FACEBOOK) */}
+      <div className="flex flex-col items-center justify-center my-16 px-4 z-20 relative">
+        <div className="text-center mb-6">
+          <span className="text-[#FFD51A] text-xs md:text-sm font-bold tracking-[0.2em] uppercase block mb-2">
+            Gameplay y Experiencia
+          </span>
+          <h2 className="text-2xl md:text-4xl text-white font-['PixelSplitter'] tracking-wide">
+            EXPLORA EL <span className="text-[#FFD51A]">MICTLÁN</span>
+          </h2>
+        </div>
+
+        <div className="relative rounded-2xl overflow-hidden border-2 border-[#023326] shadow-[0_0_30px_rgba(27,57,106,0.6)] bg-black/80 max-w-4xl w-full flex justify-center group">
+          <video
+            ref={videoRef}
+            src="https://res.cloudinary.com/kdpzubj7/video/upload/v1783098678/la_campanita_zvxt8n.mp4"
+            controls
+            muted
+            playsInline
+            loop
+            className="w-full max-h-[75vh] object-contain"
+          ></video>
+        </div>
+        <p className="text-xs text-gray-400 mt-3 text-center">
+          💡 El video se reproduce automáticamente al bajar en la página y se pausa si sales de la vista. Puedes activar el sonido en los controles.
+        </p>
       </div>
-      
 
     </div>
   );
