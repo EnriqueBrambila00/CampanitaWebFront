@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import '@google/model-viewer';
 
 export function Dashboard() {
   const [seccionActiva, setSeccionActiva] = useState('usuarios');
@@ -11,6 +12,7 @@ export function Dashboard() {
   const [noticias, setNoticias] = useState([]);
   const [editandoNoticiaId, setEditandoNoticiaId] = useState(null);
   const [tipoNoticia, setTipoNoticia] = useState('Noticia Oficial');
+  const [subiendoArchivo, setSubiendoArchivo] = useState(false);
   
   // Formulario genérico (reutilizado para las 3 secciones)
   const [nombre, setNombre] = useState('');
@@ -129,6 +131,36 @@ export function Dashboard() {
     setMensaje('');
   };
 
+  const manejarSubidaArchivo = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setSubiendoArchivo(true);
+    setMensaje('⏳ Subiendo archivo al servidor de La Campanita...');
+    const formData = new FormData();
+    formData.append('archivo', file);
+
+    try {
+      const res = await fetch(`${URL_BACKEND}/api/admin/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al subir archivo');
+      }
+      const data = await res.json();
+      setImagenUrl(data.url);
+      setMensaje('✅ ¡Archivo subido con éxito a /modelos3d/ y listo para guardarse!');
+    } catch (err) {
+      setMensaje(`❌ Error al subir: ${err.message}`);
+    } finally {
+      setSubiendoArchivo(false);
+      e.target.value = null;
+    }
+  };
+
   // ==========================================
   // RENDERIZADO VISUAL
   // ==========================================
@@ -193,8 +225,24 @@ export function Dashboard() {
                   <input type="text" required={seccionActiva !== 'galeria'} value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"/>
                 </div>
                 <div>
-                  <label className="block text-sm mb-1">URL de la Imagen</label>
-                  <input type="url" required value={imagenUrl} onChange={(e) => setImagenUrl(e.target.value)} className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"/>
+                  <label className="block text-sm mb-1">{seccionActiva === 'personajes' ? 'URL Imagen / Modelo 3D (.glb)' : 'URL de la Imagen'}</label>
+                  <div className="flex gap-2">
+                    <input type="text" required value={imagenUrl} onChange={(e) => setImagenUrl(e.target.value)} placeholder={seccionActiva === 'personajes' ? 'ej. /modelos3d/personaje.glb o https://...' : 'https://...'} className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"/>
+                    <input type="file" id="subirArchivoLocal" accept=".glb,.gltf,.png,.jpg,.jpeg,.webp" onChange={manejarSubidaArchivo} className="hidden" />
+                    <button 
+                      type="button" 
+                      disabled={subiendoArchivo}
+                      onClick={() => document.getElementById('subirArchivoLocal').click()} 
+                      className="bg-[#1B396A] border border-[#FFD51A] px-3 py-2 rounded text-xs font-bold text-[#FFD51A] hover:bg-[#FFD51A] hover:text-[#1B396A] transition-colors whitespace-nowrap cursor-pointer shadow-md flex items-center gap-1"
+                    >
+                      {subiendoArchivo ? '⏳...' : '📂 Mis Archivos'}
+                    </button>
+                  </div>
+                  {seccionActiva === 'personajes' && (
+                    <p className="text-[11px] text-[#FFD51A] mt-1 leading-snug">
+                      💡 Haz clic en <strong>"📂 Mis Archivos"</strong> para elegir tu modelo <code>.glb</code> desde tu computadora. Se subirá automáticamente al servidor.
+                    </p>
+                  )}
                 </div>
               </div>
               <div>
@@ -217,7 +265,20 @@ export function Dashboard() {
                 <tbody>
                   {seccionActiva === 'personajes' && personajes.map((item) => (
                     <tr key={item.id_personaje} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="p-3"><img src={item.imagen_url} alt="miniatura" className="w-12 h-12 object-cover rounded"/></td>
+                      <td className="p-3">
+                        {item.imagen_url && (item.imagen_url.toLowerCase().endsWith('.glb') || item.imagen_url.toLowerCase().endsWith('.gltf') || item.imagen_url.toLowerCase().includes('.glb')) ? (
+                          <div className="w-14 h-14 bg-[#0D2144] rounded border border-[#FFD51A] overflow-hidden flex items-center justify-center relative">
+                            <model-viewer
+                              src={item.imagen_url}
+                              auto-rotate
+                              style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
+                            ></model-viewer>
+                            <span className="absolute bottom-0 bg-black/80 text-[#FFD51A] text-[8px] px-1 font-bold font-['PixelSplitter']">3D</span>
+                          </div>
+                        ) : (
+                          <img src={item.imagen_url} alt="miniatura" className="w-12 h-12 object-cover rounded"/>
+                        )}
+                      </td>
                       <td className="p-3 font-bold">{item.nombre}</td>
                       <td className="p-3 text-center"><button onClick={() => manejarBorrar(item.id_personaje, 'personajes', setPersonajes)} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs font-bold">🗑️ Borrar</button></td>
                     </tr>
