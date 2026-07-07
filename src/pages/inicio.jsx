@@ -144,7 +144,7 @@ export function Inicio() {
           ></video>
         </div>
         <p className="text-xs text-gray-400 mt-3 text-center">
-          💡 El video se reproduce automáticamente al bajar en la página y se pausa si sales de la vista. Puedes activar el sonido en los controles.
+          
         </p>
       </div>
 

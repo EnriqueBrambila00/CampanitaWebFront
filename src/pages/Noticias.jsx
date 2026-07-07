@@ -27,13 +27,21 @@ export function Noticias() {
     obtenerNoticias();
   }, []);
 
-  // Función para obtener categoría derivada (para mantener compatibilidad visual sin modificar la BD)
+  // Función para obtener categoría derivada o del tag [Categoría] en el título
   const obtenerCategoria = (titulo) => {
-    const t = (titulo || '').toLowerCase();
+    const tit = titulo || '';
+    const match = tit.match(/^\[(.*?)\]\s*(.*)$/);
+    if (match) return match[1];
+    const t = tit.toLowerCase();
     if (t.includes('parche') || t.includes('update') || t.includes('actualización') || t.includes('v0.')) return 'Actualización';
     if (t.includes('devlog') || t.includes('desarrollo') || t.includes('mapa')) return 'Devlog';
-    if (t.includes('sonido') || t.includes('banda') || t.includes('audio')) return 'Sonido';
     return 'Noticia Oficial';
+  };
+
+  const obtenerTituloLimpio = (titulo) => {
+    const tit = titulo || '';
+    const match = tit.match(/^\[(.*?)\]\s*(.*)$/);
+    return match ? match[2] : tit;
   };
 
   // Función para recortar contenido sin cortar palabras a la mitad
@@ -45,7 +53,7 @@ export function Noticias() {
     return (ultimoEspacio > 0 ? recortado.substring(0, ultimoEspacio) : recortado) + '...';
   };
 
-  const categorias = ['Todas', 'Noticia Oficial', 'Actualización', 'Devlog', 'Sonido'];
+  const categorias = ['Todas', 'Noticia Oficial', 'Actualización', 'Devlog'];
 
   const noticiasConCategoria = noticias.map(n => ({
     ...n,
@@ -135,7 +143,7 @@ export function Noticias() {
               <div className="p-6 flex-1 flex flex-col justify-between">
                 <div>
                   <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[#FFD51A] transition-colors font-['PixelSplitter'] leading-snug">
-                    {noticia.titulo}
+                    {obtenerTituloLimpio(noticia.titulo)}
                   </h3>
                   <p className="text-gray-300 text-sm leading-relaxed mb-6">
                     {generarResumen(noticia.contenido, 150)}

@@ -31,11 +31,19 @@ export function NoticiaDetalle() {
   }, [id]);
 
   const obtenerCategoria = (titulo) => {
-    const t = (titulo || '').toLowerCase();
+    const tit = titulo || '';
+    const match = tit.match(/^\[(.*?)\]\s*(.*)$/);
+    if (match) return match[1];
+    const t = tit.toLowerCase();
     if (t.includes('parche') || t.includes('update') || t.includes('actualización') || t.includes('v0.')) return 'Actualización';
     if (t.includes('devlog') || t.includes('desarrollo') || t.includes('mapa')) return 'Devlog';
-    if (t.includes('sonido') || t.includes('banda') || t.includes('audio')) return 'Sonido';
     return 'Noticia Oficial';
+  };
+
+  const obtenerTituloLimpio = (titulo) => {
+    const tit = titulo || '';
+    const match = tit.match(/^\[(.*?)\]\s*(.*)$/);
+    return match ? match[2] : tit;
   };
 
   if (cargando) {
@@ -93,7 +101,7 @@ export function NoticiaDetalle() {
 
         {/* TÍTULO */}
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white font-['PixelSplitter'] mb-8 leading-tight drop-shadow-md">
-          {noticia.titulo}
+          {obtenerTituloLimpio(noticia.titulo)}
         </h1>
 
         {/* IMAGEN GRANDE */}

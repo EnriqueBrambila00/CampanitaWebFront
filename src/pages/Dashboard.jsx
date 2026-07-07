@@ -10,6 +10,7 @@ export function Dashboard() {
   const [mapas, setMapas] = useState([]);
   const [noticias, setNoticias] = useState([]);
   const [editandoNoticiaId, setEditandoNoticiaId] = useState(null);
+  const [tipoNoticia, setTipoNoticia] = useState('Noticia Oficial');
   
   // Formulario genérico (reutilizado para las 3 secciones)
   const [nombre, setNombre] = useState('');
@@ -23,7 +24,7 @@ export function Dashboard() {
     if (seccionActiva === 'mapas') obtenerDatos('mapas', setMapas);
     if (seccionActiva === 'noticias') obtenerDatos('noticias', setNoticias);
     // Limpiamos los campos al cambiar de pestaña
-    setNombre(''); setDescripcion(''); setImagenUrl(''); setMensaje(''); setEditandoNoticiaId(null);
+    setNombre(''); setDescripcion(''); setImagenUrl(''); setMensaje(''); setEditandoNoticiaId(null); setTipoNoticia('Noticia Oficial');
   }, [seccionActiva]);
 
   // ==========================================
@@ -81,12 +82,15 @@ export function Dashboard() {
         : `${URL_BACKEND}/api/admin/noticias`;
       const metodo = editandoNoticiaId ? 'PUT' : 'POST';
 
+      const tituloLimpio = nombre.replace(/^\[(.*?)\]\s*/, '').trim();
+      const tituloConTag = `[${tipoNoticia}] ${tituloLimpio}`;
+
       const res = await fetch(url, {
         method: metodo,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          titulo: nombre,
+          titulo: tituloConTag,
           contenido: descripcion,
           imagen_url: imagenUrl || null
         })
@@ -96,14 +100,24 @@ export function Dashboard() {
         throw new Error(errorData.error || 'Error al guardar la noticia');
       }
       setMensaje(editandoNoticiaId ? '✅ ¡Noticia actualizada con éxito!' : '✅ ¡Noticia creada con éxito!');
-      setNombre(''); setDescripcion(''); setImagenUrl(''); setEditandoNoticiaId(null);
+      setNombre(''); setDescripcion(''); setImagenUrl(''); setEditandoNoticiaId(null); setTipoNoticia('Noticia Oficial');
       obtenerDatos('noticias', setNoticias);
     } catch (err) { setMensaje(`❌ Error: ${err.message}`); }
   };
 
   const iniciarEdicionNoticia = (item) => {
     setEditandoNoticiaId(item.id_noticia);
-    setNombre(item.titulo || '');
+    const tit = item.titulo || '';
+    const match = tit.match(/^\[(.*?)\]\s*(.*)$/);
+    if (match) {
+      setTipoNoticia(match[1]);
+      setNombre(match[2]);
+    } else {
+      const cat = tit.toLowerCase().includes('parche') || tit.toLowerCase().includes('update') || tit.toLowerCase().includes('actualización') ? 'Actualización' 
+                : tit.toLowerCase().includes('devlog') ? 'Devlog' : 'Noticia Oficial';
+      setTipoNoticia(cat);
+      setNombre(tit);
+    }
     setDescripcion(item.contenido || '');
     setImagenUrl(item.imagen_url || '');
     setMensaje('✏️ Modo edición activado. Modifica los campos y guarda.');
@@ -111,7 +125,7 @@ export function Dashboard() {
 
   const cancelarEdicionNoticia = () => {
     setEditandoNoticiaId(null);
-    setNombre(''); setDescripcion(''); setImagenUrl('');
+    setNombre(''); setDescripcion(''); setImagenUrl(''); setTipoNoticia('Noticia Oficial');
     setMensaje('');
   };
 
@@ -245,13 +259,25 @@ export function Dashboard() {
               <h4 className="text-xl font-bold text-white mb-2">
                 {editandoNoticiaId ? '✏️ Editar Noticia' : '✨ Publicar Nueva Noticia'}
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm mb-1">Título (máx. 150 caracteres)</label>
+                  <label className="block text-sm mb-1">Tipo de Noticia</label>
+                  <select
+                    value={tipoNoticia}
+                    onChange={(e) => setTipoNoticia(e.target.value)}
+                    className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"
+                  >
+                    <option value="Noticia Oficial" className="bg-[#0D2144]">Noticia Oficial</option>
+                    <option value="Actualización" className="bg-[#0D2144]">Actualización</option>
+                    <option value="Devlog" className="bg-[#0D2144]">Devlog</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">Título (máx. 130 caracteres)</label>
                   <input 
                     type="text" 
                     required 
-                    maxLength={150}
+                    maxLength={130}
                     value={nombre} 
                     onChange={(e) => setNombre(e.target.value)} 
                     className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"
@@ -319,7 +345,22 @@ export function Dashboard() {
                           className="w-12 h-12 object-cover rounded"
                         />
                       </td>
-                      <td className="p-3 font-bold">{item.titulo}</td>
+                      <td className="p-3">
+                        {(() => {
+                          const tit = item.titulo || '';
+                          const match = tit.match(/^\[(.*?)\]\s*(.*)$/);
+                          const cat = match ? match[1] : (tit.toLowerCase().includes('update') || tit.toLowerCase().includes('actualización') ? 'Actualización' : tit.toLowerCase().includes('devlog') ? 'Devlog' : 'Noticia Oficial');
+                          const tituloLimpio = match ? match[2] : tit;
+                          return (
+                            <div>
+                              <span className="inline-block px-2 py-0.5 bg-[#FFD51A]/20 border border-[#FFD51A] text-[#FFD51A] text-[10px] rounded font-bold mr-2">
+                                {cat.toUpperCase()}
+                              </span>
+                              <span className="font-bold">{tituloLimpio}</span>
+                            </div>
+                          );
+                        })()}
+                      </td>
                       <td className="p-3 text-sm text-gray-300">
                         {new Date(item.fecha_publicacion).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </td>
