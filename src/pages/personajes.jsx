@@ -59,9 +59,7 @@ export function Personajes() {
                   <h3 className="text-2xl font-bold text-white mb-3">{p.nombre}</h3>
                   <p className="text-gray-300 text-sm leading-relaxed">{p.descripcion}</p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-white/10 text-xs text-[#FFD51A] tracking-wider uppercase font-['PixelSplitter']">
-                  ID: #{p.id_personaje}
-                </div>
+
               </div>
             </div>
           ))}
