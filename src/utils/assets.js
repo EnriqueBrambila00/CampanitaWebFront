@@ -7,10 +7,5 @@
  * evitando problemas con almacenamientos efímeros en plataformas como Render.
  */
 export const obtenerUrlRecurso = (url) => {
-  if (!url) return '';
-  if (url.includes('/modelos3d/')) {
-    const parts = url.split('/modelos3d/');
-    return `/modelos3d/${parts[parts.length - 1]}`;
-  }
-  return url;
+  return url || '';
 };
