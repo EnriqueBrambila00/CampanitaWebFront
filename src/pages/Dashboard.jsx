@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import '@google/model-viewer';
 
+const globFiles = import.meta.glob('/public/modelos3d/*.glb');
+const modelosLocales = Object.keys(globFiles).map(path => path.replace('/public/modelos3d/', ''));
+
 export function Dashboard() {
   const [seccionActiva, setSeccionActiva] = useState('usuarios');
   const URL_BACKEND = 'https://campanitaweb.onrender.com';
@@ -238,9 +241,23 @@ export function Dashboard() {
                     </button>
                   </div>
                   {seccionActiva === 'personajes' && (
-                    <p className="text-[11px] text-[#FFD51A] mt-1 leading-snug">
-                      💡 Haz clic en <strong>"📂 Mis Archivos"</strong> para elegir tu modelo <code>.glb</code> desde tu computadora. Se subirá automáticamente al servidor.
-                    </p>
+                    <div className="mt-3">
+                      <label className="block text-xs mb-1 text-[#FFD51A]">O selecciona un modelo ya subido:</label>
+                      <select 
+                        onChange={(e) => {
+                          if (e.target.value) setImagenUrl(`/modelos3d/${e.target.value}`);
+                        }}
+                        className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none text-sm"
+                      >
+                        <option value="">-- Elige un modelo de la carpeta --</option>
+                        {modelosLocales.map(m => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
+                      </select>
+                      <p className="text-[11px] text-gray-400 mt-2 leading-snug">
+                        💡 Si eliges uno de la lista o usas <strong>"📂 Mis Archivos"</strong>, se usará automáticamente.
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
