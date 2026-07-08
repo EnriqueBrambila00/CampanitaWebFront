@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import '@google/model-viewer';
 
-const globFiles = import.meta.glob('/public/modelos3d/*.glb');
+const globFiles = import.meta.glob('/public/modelos3d/*.glb', { query: '?url' });
 const modelosLocales = Object.keys(globFiles).map(path => path.replace('/public/modelos3d/', ''));
 
 export function Dashboard() {
