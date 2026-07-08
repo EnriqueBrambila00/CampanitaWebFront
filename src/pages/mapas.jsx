@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { obtenerUrlRecurso } from '../utils/assets';
 
 export function Mapas() {
   const [mapas, setMapas] = useState([]);
@@ -42,7 +43,7 @@ export function Mapas() {
             <div key={mapa.id_mapa} className="bg-[#1B396A]/40 rounded-2xl overflow-hidden shadow-2xl border border-[#FFD51A]/20 hover:border-[#FFD51A]/60 transition-colors duration-300">
               <div className="relative h-72">
                 <img 
-                  src={mapa.imagen_url} 
+                  src={obtenerUrlRecurso(mapa.imagen_url)} 
                   alt={mapa.nombre} 
                   className="w-full h-full object-cover"
                 />

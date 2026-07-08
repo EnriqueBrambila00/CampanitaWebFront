@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { obtenerUrlRecurso } from '../utils/assets';
 
 export function Noticias() {
   const [noticias, setNoticias] = useState([]);
@@ -126,7 +127,7 @@ export function Noticias() {
             >
               <div className="relative h-60 overflow-hidden bg-[#0D2144]">
                 <img
-                  src={noticia.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
+                  src={obtenerUrlRecurso(noticia.imagen_url) || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
                   alt={noticia.titulo}
                   className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
                   onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'; }}

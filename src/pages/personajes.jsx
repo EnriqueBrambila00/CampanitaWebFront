@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import '@google/model-viewer';
+import { obtenerUrlRecurso } from '../utils/assets';
 
 export function Personajes() {
   const [personajes, setPersonajes] = useState([]);
@@ -35,7 +36,7 @@ export function Personajes() {
               {p.imagen_url && (p.imagen_url.toLowerCase().endsWith('.glb') || p.imagen_url.toLowerCase().endsWith('.gltf') || p.imagen_url.toLowerCase().includes('.glb')) ? (
                 <div className="w-full h-64 bg-[#0D2144] relative border-b border-white/10 group">
                   <model-viewer
-                    src={p.imagen_url}
+                    src={obtenerUrlRecurso(p.imagen_url)}
                     alt={`Modelo 3D de ${p.nombre}`}
                     auto-rotate
                     camera-controls
@@ -49,7 +50,7 @@ export function Personajes() {
                 </div>
               ) : (
                 <img 
-                  src={p.imagen_url || "https://images.unsplash.com/photo-1579546929518-9e396f3cc809"} 
+                  src={obtenerUrlRecurso(p.imagen_url) || "https://images.unsplash.com/photo-1579546929518-9e396f3cc809"} 
                   alt={p.nombre} 
                   className="w-full h-56 object-cover"
                 />

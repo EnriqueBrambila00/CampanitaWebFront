@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import '@google/model-viewer';
+import { obtenerUrlRecurso } from '../utils/assets';
 
 export function Dashboard() {
   const [seccionActiva, setSeccionActiva] = useState('usuarios');
@@ -269,14 +270,14 @@ export function Dashboard() {
                         {item.imagen_url && (item.imagen_url.toLowerCase().endsWith('.glb') || item.imagen_url.toLowerCase().endsWith('.gltf') || item.imagen_url.toLowerCase().includes('.glb')) ? (
                           <div className="w-14 h-14 bg-[#0D2144] rounded border border-[#FFD51A] overflow-hidden flex items-center justify-center relative">
                             <model-viewer
-                              src={item.imagen_url}
+                              src={obtenerUrlRecurso(item.imagen_url)}
                               auto-rotate
                               style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
                             ></model-viewer>
                             <span className="absolute bottom-0 bg-black/80 text-[#FFD51A] text-[8px] px-1 font-bold font-['PixelSplitter']">3D</span>
                           </div>
                         ) : (
-                          <img src={item.imagen_url} alt="miniatura" className="w-12 h-12 object-cover rounded"/>
+                          <img src={obtenerUrlRecurso(item.imagen_url)} alt="miniatura" className="w-12 h-12 object-cover rounded"/>
                         )}
                       </td>
                       <td className="p-3 font-bold">{item.nombre}</td>
@@ -285,14 +286,14 @@ export function Dashboard() {
                   ))}
                   {seccionActiva === 'mapas' && mapas.map((item) => (
                     <tr key={item.id_mapa} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="p-3"><img src={item.imagen_url} alt="miniatura" className="w-12 h-12 object-cover rounded"/></td>
+                      <td className="p-3"><img src={obtenerUrlRecurso(item.imagen_url)} alt="miniatura" className="w-12 h-12 object-cover rounded"/></td>
                       <td className="p-3 font-bold">{item.nombre}</td>
                       <td className="p-3 text-center"><button onClick={() => manejarBorrar(item.id_mapa, 'mapas', setMapas)} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs font-bold">🗑️ Borrar</button></td>
                     </tr>
                   ))}
                   {seccionActiva === 'galeria' && galeria.map((item) => (
                     <tr key={item.id_imagen} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="p-3"><img src={item.imagen_url} alt="miniatura" className="w-12 h-12 object-cover rounded"/></td>
+                      <td className="p-3"><img src={obtenerUrlRecurso(item.imagen_url)} alt="miniatura" className="w-12 h-12 object-cover rounded"/></td>
                       <td className="p-3 font-bold">{item.titulo || 'Sin título'}</td>
                       <td className="p-3 text-center"><button onClick={() => manejarBorrar(item.id_imagen, 'galeria', setGaleria)} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs font-bold">🗑️ Borrar</button></td>
                     </tr>
@@ -401,7 +402,7 @@ export function Dashboard() {
                     <tr key={item.id_noticia} className="border-b border-white/5 hover:bg-white/5">
                       <td className="p-3">
                         <img 
-                          src={item.imagen_url || 'https://via.placeholder.com/150/1B396A/FFD51A?text=Sin+Img'} 
+                          src={obtenerUrlRecurso(item.imagen_url) || 'https://via.placeholder.com/150/1B396A/FFD51A?text=Sin+Img'} 
                           alt="miniatura" 
                           className="w-12 h-12 object-cover rounded"
                         />

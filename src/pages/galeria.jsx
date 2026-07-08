@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { obtenerUrlRecurso } from '../utils/assets';
 
 export function Galeria() {
   const [imagenes, setImagenes] = useState([]);
@@ -41,7 +42,7 @@ export function Galeria() {
           {imagenes.map((img) => (
             <div key={img.id_imagen} className="group relative rounded-xl overflow-hidden shadow-xl border border-[#807E82]/30 bg-[#1B396A]/50">
               <img 
-                src={img.imagen_url} 
+                src={obtenerUrlRecurso(img.imagen_url)} 
                 alt={img.titulo || 'Arte de La Campanita'} 
                 className="w-full h-64 object-cover transform transition-transform duration-500 group-hover:scale-110"
               />

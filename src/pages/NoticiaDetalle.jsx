@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { obtenerUrlRecurso } from '../utils/assets';
 
 export function NoticiaDetalle() {
   const { id } = useParams();
@@ -107,7 +108,7 @@ export function NoticiaDetalle() {
         {/* IMAGEN GRANDE */}
         <div className="relative rounded-2xl overflow-hidden mb-10 border border-white/15 shadow-2xl bg-[#0D2144]">
           <img
-            src={noticia.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
+            src={obtenerUrlRecurso(noticia.imagen_url) || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
             alt={noticia.titulo}
             className="w-full max-h-[480px] object-cover"
             onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'; }}
