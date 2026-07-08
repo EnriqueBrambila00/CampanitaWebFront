@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import '@google/model-viewer';
-import { obtenerUrlRecurso } from '../utils/assets';
 
 export function Dashboard() {
   const [seccionActiva, setSeccionActiva] = useState('usuarios');
   const URL_BACKEND = 'https://campanitaweb.onrender.com';
-  
+
   // --- ESTADOS ---
   const [personajes, setPersonajes] = useState([]);
   const [galeria, setGaleria] = useState([]);
@@ -14,7 +13,7 @@ export function Dashboard() {
   const [editandoNoticiaId, setEditandoNoticiaId] = useState(null);
   const [tipoNoticia, setTipoNoticia] = useState('Noticia Oficial');
   const [subiendoArchivo, setSubiendoArchivo] = useState(false);
-  
+
   // Formulario genérico (reutilizado para las 3 secciones)
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -45,7 +44,7 @@ export function Dashboard() {
     setMensaje('');
     try {
       // Ajustamos los nombres de los campos dependiendo si es galería o no
-      const bodyData = endpoint === 'galeria' 
+      const bodyData = endpoint === 'galeria'
         ? { titulo: nombre, descripcion, imagen_url: imagenUrl }
         : { nombre, descripcion, imagen_url: imagenUrl };
 
@@ -80,7 +79,7 @@ export function Dashboard() {
     e.preventDefault();
     setMensaje('');
     try {
-      const url = editandoNoticiaId 
+      const url = editandoNoticiaId
         ? `${URL_BACKEND}/api/admin/noticias/${editandoNoticiaId}`
         : `${URL_BACKEND}/api/admin/noticias`;
       const metodo = editandoNoticiaId ? 'PUT' : 'POST';
@@ -116,8 +115,8 @@ export function Dashboard() {
       setTipoNoticia(match[1]);
       setNombre(match[2]);
     } else {
-      const cat = tit.toLowerCase().includes('parche') || tit.toLowerCase().includes('update') || tit.toLowerCase().includes('actualización') ? 'Actualización' 
-                : tit.toLowerCase().includes('devlog') ? 'Devlog' : 'Noticia Oficial';
+      const cat = tit.toLowerCase().includes('parche') || tit.toLowerCase().includes('update') || tit.toLowerCase().includes('actualización') ? 'Actualización'
+        : tit.toLowerCase().includes('devlog') ? 'Devlog' : 'Noticia Oficial';
       setTipoNoticia(cat);
       setNombre(tit);
     }
@@ -175,16 +174,15 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-[75vh] mt-6 bg-[#1B396A]/80 rounded-xl shadow-2xl border border-[#807E82]/30 overflow-hidden font-sans text-gray-200">
-      
+
       {/* BARRA LATERAL */}
       <aside className="w-full md:w-64 bg-[#0D2144] p-6 border-r border-[#807E82]/30">
         <h2 className="text-xl text-[#FFD51A] mb-8 font-['PixelSplitter'] tracking-widest text-center">PANEL ADMIN</h2>
         <nav className="space-y-2">
           {secciones.map((sec) => (
             <button key={sec.id} onClick={() => setSeccionActiva(sec.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left font-bold transition-colors ${
-                seccionActiva === sec.id ? 'bg-[#FFD51A] text-[#1B396A]' : 'hover:bg-white/10 text-gray-300'
-              }`}>
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left font-bold transition-colors ${seccionActiva === sec.id ? 'bg-[#FFD51A] text-[#1B396A]' : 'hover:bg-white/10 text-gray-300'
+                }`}>
               <span className="text-xl">{sec.icono}</span> {sec.nombre}
             </button>
           ))}
@@ -193,7 +191,7 @@ export function Dashboard() {
 
       {/* ÁREA DE CONTENIDO */}
       <main className="flex-1 p-8 overflow-y-auto">
-        
+
         {seccionActiva === 'usuarios' && (
           <div>
             <h3 className="text-3xl font-['PixelSplitter'] text-[#FFD51A] tracking-wider mb-6">GESTIÓN DE USUARIOS</h3>
@@ -207,33 +205,33 @@ export function Dashboard() {
             <h3 className="text-3xl font-['PixelSplitter'] text-[#FFD51A] tracking-wider mb-6 uppercase">
               GESTIÓN DE {seccionActiva}
             </h3>
-            
+
             {mensaje && <div className="bg-white/10 border border-[#FFD51A] p-3 rounded text-center font-bold text-[#FFD51A]">{mensaje}</div>}
-            
+
             {/* FORMULARIO DINÁMICO */}
-            <form 
+            <form
               onSubmit={(e) => {
                 if (seccionActiva === 'personajes') manejarGuardar(e, 'personajes', setPersonajes);
                 if (seccionActiva === 'mapas') manejarGuardar(e, 'mapas', setMapas);
                 if (seccionActiva === 'galeria') manejarGuardar(e, 'galeria', setGaleria);
-              }} 
+              }}
               className="bg-black/20 p-6 rounded border border-white/10 space-y-4"
             >
               <h4 className="text-xl font-bold text-white mb-2">✨ Subir Nuevo Registro</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm mb-1">{seccionActiva === 'galeria' ? 'Título' : 'Nombre'}</label>
-                  <input type="text" required={seccionActiva !== 'galeria'} value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"/>
+                  <input type="text" required={seccionActiva !== 'galeria'} value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none" />
                 </div>
                 <div>
                   <label className="block text-sm mb-1">{seccionActiva === 'personajes' ? 'URL Imagen / Modelo 3D (.glb)' : 'URL de la Imagen'}</label>
                   <div className="flex gap-2">
-                    <input type="text" required value={imagenUrl} onChange={(e) => setImagenUrl(e.target.value)} placeholder={seccionActiva === 'personajes' ? 'ej. /modelos3d/personaje.glb o https://...' : 'https://...'} className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"/>
+                    <input type="text" required value={imagenUrl} onChange={(e) => setImagenUrl(e.target.value)} placeholder={seccionActiva === 'personajes' ? 'ej. /modelos3d/personaje.glb o https://...' : 'https://...'} className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none" />
                     <input type="file" id="subirArchivoLocal" accept=".glb,.gltf,.png,.jpg,.jpeg,.webp" onChange={manejarSubidaArchivo} className="hidden" />
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       disabled={subiendoArchivo}
-                      onClick={() => document.getElementById('subirArchivoLocal').click()} 
+                      onClick={() => document.getElementById('subirArchivoLocal').click()}
                       className="bg-[#1B396A] border border-[#FFD51A] px-3 py-2 rounded text-xs font-bold text-[#FFD51A] hover:bg-[#FFD51A] hover:text-[#1B396A] transition-colors whitespace-nowrap cursor-pointer shadow-md flex items-center gap-1"
                     >
                       {subiendoArchivo ? '⏳...' : '📂 Mis Archivos'}
@@ -270,14 +268,14 @@ export function Dashboard() {
                         {item.imagen_url && (item.imagen_url.toLowerCase().endsWith('.glb') || item.imagen_url.toLowerCase().endsWith('.gltf') || item.imagen_url.toLowerCase().includes('.glb')) ? (
                           <div className="w-14 h-14 bg-[#0D2144] rounded border border-[#FFD51A] overflow-hidden flex items-center justify-center relative">
                             <model-viewer
-                              src={obtenerUrlRecurso(item.imagen_url)}
+                              src={item.imagen_url}
                               auto-rotate
                               style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
                             ></model-viewer>
                             <span className="absolute bottom-0 bg-black/80 text-[#FFD51A] text-[8px] px-1 font-bold font-['PixelSplitter']">3D</span>
                           </div>
                         ) : (
-                          <img src={obtenerUrlRecurso(item.imagen_url)} alt="miniatura" className="w-12 h-12 object-cover rounded"/>
+                          <img src={item.imagen_url} alt="miniatura" className="w-12 h-12 object-cover rounded" />
                         )}
                       </td>
                       <td className="p-3 font-bold">{item.nombre}</td>
@@ -286,14 +284,14 @@ export function Dashboard() {
                   ))}
                   {seccionActiva === 'mapas' && mapas.map((item) => (
                     <tr key={item.id_mapa} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="p-3"><img src={obtenerUrlRecurso(item.imagen_url)} alt="miniatura" className="w-12 h-12 object-cover rounded"/></td>
+                      <td className="p-3"><img src={item.imagen_url} alt="miniatura" className="w-12 h-12 object-cover rounded" /></td>
                       <td className="p-3 font-bold">{item.nombre}</td>
                       <td className="p-3 text-center"><button onClick={() => manejarBorrar(item.id_mapa, 'mapas', setMapas)} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs font-bold">🗑️ Borrar</button></td>
                     </tr>
                   ))}
                   {seccionActiva === 'galeria' && galeria.map((item) => (
                     <tr key={item.id_imagen} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="p-3"><img src={obtenerUrlRecurso(item.imagen_url)} alt="miniatura" className="w-12 h-12 object-cover rounded"/></td>
+                      <td className="p-3"><img src={item.imagen_url} alt="miniatura" className="w-12 h-12 object-cover rounded" /></td>
                       <td className="p-3 font-bold">{item.titulo || 'Sin título'}</td>
                       <td className="p-3 text-center"><button onClick={() => manejarBorrar(item.id_imagen, 'galeria', setGaleria)} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs font-bold">🗑️ Borrar</button></td>
                     </tr>
@@ -310,12 +308,12 @@ export function Dashboard() {
             <h3 className="text-3xl font-['PixelSplitter'] text-[#FFD51A] tracking-wider mb-6 uppercase">
               GESTIÓN DE NOTICIAS
             </h3>
-            
+
             {mensaje && <div className="bg-white/10 border border-[#FFD51A] p-3 rounded text-center font-bold text-[#FFD51A]">{mensaje}</div>}
-            
+
             {/* FORMULARIO NOTICIAS */}
-            <form 
-              onSubmit={manejarGuardarNoticia} 
+            <form
+              onSubmit={manejarGuardarNoticia}
               className="bg-black/20 p-6 rounded border border-white/10 space-y-4"
             >
               <h4 className="text-xl font-bold text-white mb-2">
@@ -336,22 +334,22 @@ export function Dashboard() {
                 </div>
                 <div>
                   <label className="block text-sm mb-1">Título (máx. 130 caracteres)</label>
-                  <input 
-                    type="text" 
-                    required 
+                  <input
+                    type="text"
+                    required
                     maxLength={130}
-                    value={nombre} 
-                    onChange={(e) => setNombre(e.target.value)} 
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
                     className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"
                     placeholder="Ej. Lanzamiento Beta v0.8.5"
                   />
                 </div>
                 <div>
                   <label className="block text-sm mb-1">URL de la Imagen (Opcional)</label>
-                  <input 
-                    type="url" 
-                    value={imagenUrl} 
-                    onChange={(e) => setImagenUrl(e.target.value)} 
+                  <input
+                    type="url"
+                    value={imagenUrl}
+                    onChange={(e) => setImagenUrl(e.target.value)}
                     className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"
                     placeholder="https://..."
                   />
@@ -365,11 +363,11 @@ export function Dashboard() {
               </div>
               <div>
                 <label className="block text-sm mb-1">Contenido de la Noticia</label>
-                <textarea 
-                  required 
-                  value={descripcion} 
-                  onChange={(e) => setDescripcion(e.target.value)} 
-                  rows="4" 
+                <textarea
+                  required
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  rows="4"
                   className="w-full p-2 rounded bg-black/40 border border-gray-600 text-white focus:border-[#FFD51A] outline-none"
                   placeholder="Escribe el contenido completo..."
                 ></textarea>
@@ -401,9 +399,9 @@ export function Dashboard() {
                   {noticias.map((item) => (
                     <tr key={item.id_noticia} className="border-b border-white/5 hover:bg-white/5">
                       <td className="p-3">
-                        <img 
-                          src={obtenerUrlRecurso(item.imagen_url) || 'https://via.placeholder.com/150/1B396A/FFD51A?text=Sin+Img'} 
-                          alt="miniatura" 
+                        <img
+                          src={item.imagen_url || 'https://via.placeholder.com/150/1B396A/FFD51A?text=Sin+Img'}
+                          alt="miniatura"
                           className="w-12 h-12 object-cover rounded"
                         />
                       </td>
@@ -427,14 +425,14 @@ export function Dashboard() {
                         {new Date(item.fecha_publicacion).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </td>
                       <td className="p-3 text-center space-x-2">
-                        <button 
-                          onClick={() => iniciarEdicionNoticia(item)} 
+                        <button
+                          onClick={() => iniciarEdicionNoticia(item)}
                           className="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-xs font-bold transition-colors"
                         >
                           ✏️ Editar
                         </button>
-                        <button 
-                          onClick={() => manejarBorrar(item.id_noticia, 'noticias', setNoticias)} 
+                        <button
+                          onClick={() => manejarBorrar(item.id_noticia, 'noticias', setNoticias)}
                           className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs font-bold transition-colors"
                         >
                           🗑️ Borrar

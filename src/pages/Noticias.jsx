@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { obtenerUrlRecurso } from '../utils/assets';
 
 export function Noticias() {
   const [noticias, setNoticias] = useState([]);
@@ -67,7 +66,7 @@ export function Noticias() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 font-sans text-gray-200">
-      
+
       {/* CABECERA */}
       <div className="text-center mb-12">
         <h1 className="text-4xl sm:text-5xl font-['PixelSplitter'] text-[#FFD51A] tracking-widest uppercase mb-4 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]">
@@ -83,11 +82,10 @@ export function Noticias() {
             <button
               key={cat}
               onClick={() => setCategoriaActiva(cat)}
-              className={`px-5 py-2 rounded-xl font-['PixelSplitter'] text-xs tracking-wider transition-all duration-300 cursor-pointer ${
-                categoriaActiva === cat
+              className={`px-5 py-2 rounded-xl font-['PixelSplitter'] text-xs tracking-wider transition-all duration-300 cursor-pointer ${categoriaActiva === cat
                   ? 'bg-[#FFD51A] text-[#1B396A] font-bold shadow-[0_0_15px_rgba(255,213,26,0.4)] scale-105'
                   : 'bg-[#1B396A]/60 text-gray-300 hover:bg-[#1B396A] hover:text-white border border-white/10'
-              }`}
+                }`}
             >
               {cat.toUpperCase()}
             </button>
@@ -127,7 +125,7 @@ export function Noticias() {
             >
               <div className="relative h-60 overflow-hidden bg-[#0D2144]">
                 <img
-                  src={obtenerUrlRecurso(noticia.imagen_url) || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
+                  src={noticia.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
                   alt={noticia.titulo}
                   className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
                   onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'; }}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { obtenerUrlRecurso } from '../utils/assets';
 
 export function NoticiaDetalle() {
   const { id } = useParams();
@@ -76,7 +75,7 @@ export function NoticiaDetalle() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 font-sans text-gray-200 animate-fadeIn">
-      
+
       {/* BOTÓN VOLVER */}
       <div className="mb-8">
         <button
@@ -89,7 +88,7 @@ export function NoticiaDetalle() {
 
       {/* TARJETA DE CONTENIDO PRINCIPAL */}
       <article className="bg-[#1B396A]/80 border-2 border-[#FFD51A]/60 rounded-3xl p-6 sm:p-10 shadow-[0_0_50px_rgba(255,213,26,0.15)] relative">
-        
+
         {/* METADATOS */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
           <span className="inline-block px-4 py-1.5 bg-[#FFD51A]/20 border border-[#FFD51A] text-[#FFD51A] font-['PixelSplitter'] text-xs rounded-full tracking-wider shadow-sm">
@@ -108,7 +107,7 @@ export function NoticiaDetalle() {
         {/* IMAGEN GRANDE */}
         <div className="relative rounded-2xl overflow-hidden mb-10 border border-white/15 shadow-2xl bg-[#0D2144]">
           <img
-            src={obtenerUrlRecurso(noticia.imagen_url) || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
+            src={noticia.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
             alt={noticia.titulo}
             className="w-full max-h-[480px] object-cover"
             onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'; }}

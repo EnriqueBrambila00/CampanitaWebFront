@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { obtenerUrlRecurso } from '../utils/assets';
 
 export function Galeria() {
   const [imagenes, setImagenes] = useState([]);
@@ -41,9 +40,9 @@ export function Galeria() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {imagenes.map((img) => (
             <div key={img.id_imagen} className="group relative rounded-xl overflow-hidden shadow-xl border border-[#807E82]/30 bg-[#1B396A]/50">
-              <img 
-                src={obtenerUrlRecurso(img.imagen_url)} 
-                alt={img.titulo || 'Arte de La Campanita'} 
+              <img
+                src={img.imagen_url}
+                alt={img.titulo || 'Arte de La Campanita'}
                 className="w-full h-64 object-cover transform transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
