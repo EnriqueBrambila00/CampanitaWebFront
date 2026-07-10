@@ -7,7 +7,16 @@ export function NoticiaDetalle() {
   const [noticia, setNoticia] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [imagenModal, setImagenModal] = useState(null);
   const URL_BACKEND = 'https://campanitaweb.onrender.com';
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setImagenModal(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const obtenerNoticia = async () => {
@@ -104,14 +113,25 @@ export function NoticiaDetalle() {
           {obtenerTituloLimpio(noticia.titulo)}
         </h1>
 
-        {/* IMAGEN GRANDE */}
-        <div className="relative rounded-2xl overflow-hidden mb-10 border border-white/15 shadow-2xl bg-[#0D2144]">
+        {/* IMAGEN GRANDE SIN RECORTE */}
+        <div
+          className="relative rounded-2xl overflow-hidden mb-10 border border-white/15 shadow-2xl bg-[#0D2144] h-80 sm:h-96 flex items-center justify-center cursor-pointer group"
+          onClick={() => setImagenModal(noticia.imagen_url)}
+        >
+          <img
+            src={noticia.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-25 blur-md scale-110 pointer-events-none"
+          />
           <img
             src={noticia.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
             alt={noticia.titulo}
-            className="w-full max-h-[480px] object-cover"
+            className="relative z-10 max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
             onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'; }}
           />
+          <div className="absolute bottom-3 right-3 bg-black/80 hover:bg-[#FFD51A] hover:text-[#1B396A] text-white px-3 py-1.5 rounded-lg text-xs font-['PixelSplitter'] border border-white/20 shadow-lg transition-colors flex items-center gap-1.5 z-20">
+            <span>👁️</span> AMPLIAR EN PANTALLA GRANDE
+          </div>
         </div>
 
         {/* CONTENIDO COMPLETO */}
@@ -133,6 +153,44 @@ export function NoticiaDetalle() {
         </div>
 
       </article>
+
+      {/* MODAL DE PANTALLA GRANDE */}
+      {imagenModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6"
+          onClick={() => setImagenModal(null)}
+        >
+          <div
+            className="relative bg-[#1B396A]/90 border-2 border-[#FFD51A] rounded-2xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-[0_0_50px_rgba(255,213,26,0.25)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/40">
+              <h3 className="text-lg sm:text-xl font-bold text-[#FFD51A] font-['PixelSplitter'] uppercase tracking-wider line-clamp-1">
+                {obtenerTituloLimpio(noticia.titulo)}
+              </h3>
+              <button
+                onClick={() => setImagenModal(null)}
+                className="bg-red-600/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-['PixelSplitter'] tracking-widest transition-colors cursor-pointer"
+              >
+                ✕ CERRAR
+              </button>
+            </div>
+
+            <div className="relative w-full h-[70vh] bg-[#0D2144] flex items-center justify-center overflow-hidden">
+              <img
+                src={imagenModal}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover opacity-20 blur-xl pointer-events-none"
+              />
+              <img
+                src={imagenModal}
+                alt={noticia.titulo}
+                className="relative z-10 max-w-full max-h-full object-contain p-4 drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

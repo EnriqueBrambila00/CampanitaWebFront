@@ -123,18 +123,25 @@ export function Noticias() {
               onClick={() => navigate(`/noticias/${noticia.id_noticia}`)}
               className="bg-[#1B396A]/50 rounded-2xl overflow-hidden border border-[#807E82]/30 shadow-xl hover:border-[#FFD51A]/80 transition-all duration-300 flex flex-col justify-between group cursor-pointer"
             >
-              <div className="relative h-60 overflow-hidden bg-[#0D2144]">
+              <div className="relative h-64 overflow-hidden bg-[#0D2144] flex items-center justify-center">
+                {/* Fondo difuminado ambiental */}
+                <img
+                  src={noticia.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover opacity-25 blur-md scale-110 pointer-events-none"
+                />
+                {/* Imagen completa sin recortes */}
                 <img
                   src={noticia.imagen_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'}
                   alt={noticia.titulo}
-                  className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                  className="relative z-10 w-full h-full object-contain transform transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200'; }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1B396A] via-transparent to-transparent opacity-80"></div>
-                <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm border border-white/20 px-3 py-1 rounded-full text-xs text-[#FFD51A] font-['PixelSplitter'] tracking-wider">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1B396A] via-transparent to-transparent opacity-60 z-10 pointer-events-none"></div>
+                <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm border border-white/20 px-3 py-1 rounded-full text-xs text-[#FFD51A] font-['PixelSplitter'] tracking-wider z-20">
                   {noticia.categoriaDerivada.toUpperCase()}
                 </div>
-                <div className="absolute bottom-4 left-4 text-xs text-gray-300 font-medium">
+                <div className="absolute bottom-4 left-4 text-xs text-gray-300 font-medium z-20">
                   📅 {new Date(noticia.fecha_publicacion).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
               </div>
