@@ -16,13 +16,24 @@ export function Dashboard() {
   const [tipoNoticia, setTipoNoticia] = useState('Noticia Oficial');
   const [subiendoArchivo, setSubiendoArchivo] = useState(false);
 
-  // Formulario genérico (reutilizado para las 3 secciones)
+  // --- ESTADOS Y FILTROS DEL MÓDULO USUARIOS ---
+  const [usuarios, setUsuarios] = useState([]);
+  const [busquedaUsuario, setBusquedaUsuario] = useState('');
+  const [filtroEstadoUsuario, setFiltroEstadoUsuario] = useState('todos');
+  const [filtroRolUsuario, setFiltroRolUsuario] = useState('todos');
+  const [ordenUsuario, setOrdenUsuario] = useState('fecha_desc');
+  const [usuarioVer, setUsuarioVer] = useState(null);
+  const [usuarioEditar, setUsuarioEditar] = useState(null);
+  const [usuarioEliminar, setUsuarioEliminar] = useState(null);
+
+  // Formulario genérico (reutilizado para las demás secciones)
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagenUrl, setImagenUrl] = useState('');
   const [mensaje, setMensaje] = useState('');
 
   useEffect(() => {
+    if (seccionActiva === 'usuarios') obtenerDatos('api/admin/usuarios', setUsuarios);
     if (seccionActiva === 'personajes') obtenerDatos('personajes', setPersonajes);
     if (seccionActiva === 'galeria') obtenerDatos('galeria', setGaleria);
     if (seccionActiva === 'mapas') obtenerDatos('mapas', setMapas);
@@ -31,12 +42,97 @@ export function Dashboard() {
     setNombre(''); setDescripcion(''); setImagenUrl(''); setMensaje(''); setEditandoNoticiaId(null); setTipoNoticia('Noticia Oficial');
   }, [seccionActiva]);
 
+  const usuariosFiltrados = usuarios
+    .filter((u) => {
+      const q = busquedaUsuario.toLowerCase();
+      const coincideBusqueda =
+        u.nombre_usuario?.toLowerCase().includes(q) ||
+        u.correo?.toLowerCase().includes(q) ||
+        u.gamertag?.toLowerCase().includes(q);
+
+      const coincideEstado =
+        filtroEstadoUsuario === 'todos' || u.estado_cuenta === filtroEstadoUsuario;
+
+      const coincideRol =
+        filtroRolUsuario === 'todos' ||
+        (u.roles && u.roles.includes(filtroRolUsuario));
+
+      return coincideBusqueda && coincideEstado && coincideRol;
+    })
+    .sort((a, b) => {
+      if (ordenUsuario === 'nombre_asc') {
+        return (a.nombre_usuario || '').localeCompare(b.nombre_usuario || '');
+      }
+      if (ordenUsuario === 'estado') {
+        return (a.estado_cuenta || '').localeCompare(b.estado_cuenta || '');
+      }
+      return new Date(b.fecha_registro || 0) - new Date(a.fecha_registro || 0);
+    });
+
+  const manejarBanearUsuario = async (id) => {
+    try {
+      const res = await fetch(`${URL_BACKEND}/api/admin/usuarios/${id}/banear`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        setMensaje('🚫 Usuario baneado correctamente');
+        obtenerDatos('api/admin/usuarios', setUsuarios);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const manejarReactivarUsuario = async (id) => {
+    try {
+      const res = await fetch(`${URL_BACKEND}/api/admin/usuarios/${id}/reactivar`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        setMensaje('✅ Usuario reactivado correctamente');
+        obtenerDatos('api/admin/usuarios', setUsuarios);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const manejarGuardarUsuarioEditado = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${URL_BACKEND}/api/admin/usuarios/${usuarioEditar.id_usuario}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(usuarioEditar)
+      });
+      if (res.ok) {
+        setMensaje('✅ Usuario actualizado correctamente');
+        setUsuarioEditar(null);
+        obtenerDatos('api/admin/usuarios', setUsuarios);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const manejarConfirmarEliminarUsuario = async () => {
+    if (!usuarioEliminar) return;
+    try {
+      const res = await fetch(`${URL_BACKEND}/api/admin/usuarios/${usuarioEliminar.id_usuario}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        setMensaje('🗑️ Usuario eliminado correctamente');
+        setUsuarioEliminar(null);
+        obtenerDatos('api/admin/usuarios', setUsuarios);
+      }
+    } catch (e) { console.error(e); }
+  };
+
   // ==========================================
   // FUNCIONES GENÉRICAS CRUD
   // ==========================================
   const obtenerDatos = async (endpoint, setEstado) => {
     try {
-      const res = await fetch(`${URL_BACKEND}/${endpoint}`);
+      const res = await fetch(`${URL_BACKEND}/${endpoint}`, { credentials: 'include' });
       if (res.ok) setEstado(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -195,9 +291,159 @@ export function Dashboard() {
       <main className="flex-1 p-8 overflow-y-auto">
 
         {seccionActiva === 'usuarios' && (
-          <div>
+          <div className="space-y-6">
             <h3 className="text-3xl font-['PixelSplitter'] text-[#FFD51A] tracking-wider mb-6">GESTIÓN DE USUARIOS</h3>
-            <div className="bg-black/20 p-6 rounded border border-white/10 text-center"><p className="opacity-70">Próxima sección a conectar.</p></div>
+
+            {mensaje && <div className="bg-white/10 border border-[#FFD51A] p-3 rounded text-center font-bold text-[#FFD51A]">{mensaje}</div>}
+
+            {/* BUSCADOR Y FILTROS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-black/20 p-4 rounded-lg border border-white/10">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">🔍 Buscar usuario</label>
+                <input
+                  type="text"
+                  placeholder="Nombre, correo o gamertag..."
+                  value={busquedaUsuario}
+                  onChange={(e) => setBusquedaUsuario(e.target.value)}
+                  className="w-full p-2 bg-black/40 border border-white/20 rounded text-sm text-white focus:outline-none focus:border-[#FFD51A]"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">🏷️ Estado de cuenta</label>
+                <select
+                  value={filtroEstadoUsuario}
+                  onChange={(e) => setFiltroEstadoUsuario(e.target.value)}
+                  className="w-full p-2 bg-[#0D2144] border border-white/20 rounded text-sm text-white focus:outline-none focus:border-[#FFD51A]"
+                >
+                  <option value="todos">Todos los estados</option>
+                  <option value="activo">Activo</option>
+                  <option value="suspendido">Suspendido</option>
+                  <option value="baneado">Baneado</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">🛡️ Rol asignado</label>
+                <select
+                  value={filtroRolUsuario}
+                  onChange={(e) => setFiltroRolUsuario(e.target.value)}
+                  className="w-full p-2 bg-[#0D2144] border border-white/20 rounded text-sm text-white focus:outline-none focus:border-[#FFD51A]"
+                >
+                  <option value="todos">Todos los roles</option>
+                  <option value="admin">Administrador</option>
+                  <option value="usuario">Usuario general</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">⚡ Ordenar por</label>
+                <select
+                  value={ordenUsuario}
+                  onChange={(e) => setOrdenUsuario(e.target.value)}
+                  className="w-full p-2 bg-[#0D2144] border border-white/20 rounded text-sm text-white focus:outline-none focus:border-[#FFD51A]"
+                >
+                  <option value="fecha_desc">Registro más reciente</option>
+                  <option value="nombre_asc">Nombre (A - Z)</option>
+                  <option value="estado">Estado de la cuenta</option>
+                </select>
+              </div>
+            </div>
+
+            {/* TABLA DE USUARIOS */}
+            <div className="bg-black/20 rounded-lg border border-white/10 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-[#0D2144] text-[#FFD51A] font-['PixelSplitter'] text-xs uppercase">
+                  <tr>
+                    <th className="p-3">ID</th>
+                    <th className="p-3">Nombre</th>
+                    <th className="p-3">Correo</th>
+                    <th className="p-3">Gamertag</th>
+                    <th className="p-3">Teléfono</th>
+                    <th className="p-3">Nacimiento</th>
+                    <th className="p-3">Registro</th>
+                    <th className="p-3">Estado</th>
+                    <th className="p-3">Rol</th>
+                    <th className="p-3 text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {usuariosFiltrados.map((u) => (
+                    <tr key={u.id_usuario} className="hover:bg-white/5 transition-colors">
+                      <td className="p-3 font-mono text-gray-400">#{u.id_usuario}</td>
+                      <td className="p-3 font-bold text-white">{u.nombre_usuario}</td>
+                      <td className="p-3 text-gray-300">{u.correo}</td>
+                      <td className="p-3 text-[#FFD51A] font-semibold">{u.gamertag || '---'}</td>
+                      <td className="p-3 text-gray-300">{u.telefono || '🔒 Privado'}</td>
+                      <td className="p-3 text-gray-300">{u.fecha_nacimiento || '---'}</td>
+                      <td className="p-3 text-gray-400 text-xs">
+                        {u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString('es-ES') : '---'}
+                      </td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase border ${
+                          u.estado_cuenta === 'baneado'
+                            ? 'bg-red-500/20 text-red-300 border-red-500/40'
+                            : u.estado_cuenta === 'suspendido'
+                            ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40'
+                            : 'bg-green-500/20 text-green-300 border-green-500/40'
+                        }`}>
+                          {u.estado_cuenta}
+                        </span>
+                      </td>
+                      <td className="p-3 text-gray-300">
+                        {u.roles && u.roles.length ? u.roles.join(', ') : 'usuario'}
+                      </td>
+                      <td className="p-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            onClick={() => setUsuarioVer(u)}
+                            title="Ver detalles"
+                            className="bg-blue-600/80 hover:bg-blue-500 text-white p-1.5 rounded transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            onClick={() => setUsuarioEditar({ ...u })}
+                            title="Editar usuario"
+                            className="bg-yellow-600/80 hover:bg-yellow-500 text-white p-1.5 rounded transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          {u.estado_cuenta === 'baneado' ? (
+                            <button
+                              onClick={() => manejarReactivarUsuario(u.id_usuario)}
+                              title="Reactivar usuario"
+                              className="bg-green-600/80 hover:bg-green-500 text-white p-1.5 rounded transition-colors"
+                            >
+                              ✅
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => manejarBanearUsuario(u.id_usuario)}
+                              title="Banear usuario"
+                              className="bg-orange-600/80 hover:bg-orange-500 text-white p-1.5 rounded transition-colors"
+                            >
+                              🚫
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setUsuarioEliminar(u)}
+                            title="Eliminar usuario"
+                            className="bg-red-600/80 hover:bg-red-500 text-white p-1.5 rounded transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {usuariosFiltrados.length === 0 && (
+                    <tr>
+                      <td colSpan="10" className="p-6 text-center text-gray-400">
+                        No se encontraron usuarios que coincidan con los filtros.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -463,6 +709,143 @@ export function Dashboard() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL VER USUARIO */}
+        {usuarioVer && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-[#1B396A] border border-[#FFD51A] rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+              <div className="flex justify-between items-center border-b border-[#FFD51A]/30 pb-3">
+                <h4 className="text-xl font-['PixelSplitter'] text-[#FFD51A]">DETALLE DEL USUARIO</h4>
+                <button onClick={() => setUsuarioVer(null)} className="text-gray-400 hover:text-white text-xl font-bold">✕</button>
+              </div>
+              <div className="space-y-2 text-sm text-gray-200">
+                <p><strong>ID:</strong> #{usuarioVer.id_usuario}</p>
+                <p><strong>Nombre de usuario:</strong> {usuarioVer.nombre_usuario}</p>
+                <p><strong>Correo electrónico:</strong> {usuarioVer.correo}</p>
+                <p><strong>Gamertag:</strong> {usuarioVer.gamertag || 'No configurado'}</p>
+                <p><strong>Teléfono secreto:</strong> {usuarioVer.telefono || '🔒 Dato privado/cifrado'}</p>
+                <p><strong>Fecha de nacimiento:</strong> {usuarioVer.fecha_nacimiento || 'No especificada'}</p>
+                <p><strong>Fecha de registro:</strong> {usuarioVer.fecha_registro ? new Date(usuarioVer.fecha_registro).toLocaleString('es-ES') : '---'}</p>
+                <p><strong>Estado de cuenta:</strong> <span className="uppercase font-bold text-[#FFD51A]">{usuarioVer.estado_cuenta}</span></p>
+                <p><strong>Roles:</strong> {usuarioVer.roles && usuarioVer.roles.length ? usuarioVer.roles.join(', ') : 'usuario'}</p>
+              </div>
+              <div className="pt-4 flex justify-end">
+                <button
+                  onClick={() => setUsuarioVer(null)}
+                  className="bg-[#FFD51A] text-[#1B396A] font-['PixelSplitter'] px-6 py-2 rounded font-bold hover:bg-[#ffe04d]"
+                >
+                  CERRAR
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL EDITAR USUARIO */}
+        {usuarioEditar && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-[#1B396A] border border-[#FFD51A] rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+              <div className="flex justify-between items-center border-b border-[#FFD51A]/30 pb-3">
+                <h4 className="text-xl font-['PixelSplitter'] text-[#FFD51A]">EDITAR USUARIO #{usuarioEditar.id_usuario}</h4>
+                <button onClick={() => setUsuarioEditar(null)} className="text-gray-400 hover:text-white text-xl font-bold">✕</button>
+              </div>
+              <form onSubmit={manejarGuardarUsuarioEditado} className="space-y-4 text-sm">
+                <div>
+                  <label className="block text-xs text-gray-300 mb-1">Nombre de usuario</label>
+                  <input
+                    type="text"
+                    required
+                    value={usuarioEditar.nombre_usuario}
+                    onChange={(e) => setUsuarioEditar({ ...usuarioEditar, nombre_usuario: e.target.value })}
+                    className="w-full p-2 bg-black/40 border border-white/20 rounded text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-300 mb-1">Correo electrónico</label>
+                  <input
+                    type="email"
+                    required
+                    value={usuarioEditar.correo}
+                    onChange={(e) => setUsuarioEditar({ ...usuarioEditar, correo: e.target.value })}
+                    className="w-full p-2 bg-black/40 border border-white/20 rounded text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-300 mb-1">Gamertag</label>
+                  <input
+                    type="text"
+                    maxLength={15}
+                    value={usuarioEditar.gamertag || ''}
+                    onChange={(e) => setUsuarioEditar({ ...usuarioEditar, gamertag: e.target.value })}
+                    className="w-full p-2 bg-black/40 border border-white/20 rounded text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-300 mb-1">Fecha de Nacimiento</label>
+                  <input
+                    type="date"
+                    value={usuarioEditar.fecha_nacimiento || ''}
+                    onChange={(e) => setUsuarioEditar({ ...usuarioEditar, fecha_nacimiento: e.target.value })}
+                    className="w-full p-2 bg-black/40 border border-white/20 rounded text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-300 mb-1">Estado de la cuenta</label>
+                  <select
+                    value={usuarioEditar.estado_cuenta}
+                    onChange={(e) => setUsuarioEditar({ ...usuarioEditar, estado_cuenta: e.target.value })}
+                    className="w-full p-2 bg-[#0D2144] border border-white/20 rounded text-white"
+                  >
+                    <option value="activo">Activo</option>
+                    <option value="suspendido">Suspendido</option>
+                    <option value="baneado">Baneado</option>
+                  </select>
+                </div>
+                <div className="pt-4 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setUsuarioEditar(null)}
+                    className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded font-bold"
+                  >
+                    CANCELAR
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#FFD51A] hover:bg-[#ffe04d] text-[#1B396A] font-['PixelSplitter'] px-6 py-2 rounded font-bold"
+                  >
+                    GUARDAR CAMBIOS
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL ELIMINAR USUARIO */}
+        {usuarioEliminar && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-[#1B396A] border border-red-500 rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl text-center">
+              <h4 className="text-xl font-['PixelSplitter'] text-red-400">¿ELIMINAR USUARIO?</h4>
+              <p className="text-sm text-gray-200">
+                Estás a punto de eliminar al usuario <strong>{usuarioEliminar.nombre_usuario}</strong> (#{usuarioEliminar.id_usuario}). Esta acción es irreversible.
+              </p>
+              <div className="pt-4 flex justify-center gap-4">
+                <button
+                  onClick={() => setUsuarioEliminar(null)}
+                  className="bg-gray-600 hover:bg-gray-500 text-white px-5 py-2 rounded font-bold"
+                >
+                  CANCELAR
+                </button>
+                <button
+                  onClick={manejarConfirmarEliminarUsuario}
+                  className="bg-red-600 hover:bg-red-500 text-white font-['PixelSplitter'] px-6 py-2 rounded font-bold"
+                >
+                  ELIMINAR
+                </button>
+              </div>
             </div>
           </div>
         )}
