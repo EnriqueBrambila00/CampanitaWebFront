@@ -16,3 +16,11 @@
   /* 2. Le decimos a Tailwind que reemplace su fuente predeterminada por la tuya */
   --font-sans: 'PixelSplitter', sans-serif;
 }
+
+/* Ocultar indicador de carga cuando model-viewer añade la clase .hide */
+model-viewer > [slot="progress-bar"].hide,
+model-viewer .hide {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

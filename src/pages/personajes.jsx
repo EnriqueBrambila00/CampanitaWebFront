@@ -68,11 +68,7 @@ export function Personajes() {
                       ar
                       ar-modes="webxr scene-viewer quick-look"
                       style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
-                    >
-                      <div slot="progress-bar" className="absolute inset-0 flex items-center justify-center bg-[#0D2144]/80 pointer-events-none">
-                        <span className="text-[#FFD51A] text-xs font-['PixelSplitter'] animate-pulse">CARGANDO 3D...</span>
-                      </div>
-                    </model-viewer>
+                    ></model-viewer>
                     <div className="absolute top-3 right-3 bg-black/80 px-3 py-1.5 rounded-full text-[11px] text-[#FFD51A] font-['PixelSplitter'] border border-[#FFD51A]/40 pointer-events-none shadow-md flex items-center gap-1.5 z-10">
                       <span>🕹️</span> 3D INTERACTIVO
                     </div>
@@ -150,11 +146,7 @@ export function Personajes() {
                   ar
                   ar-modes="webxr scene-viewer quick-look"
                   style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
-                >
-                  <div slot="progress-bar" className="absolute inset-0 flex items-center justify-center bg-[#0D2144]/80 pointer-events-none">
-                    <span className="text-[#FFD51A] text-sm font-['PixelSplitter'] animate-pulse">CARGANDO MODELO 3D EN ALTA DEFINICIÓN...</span>
-                  </div>
-                </model-viewer>
+                ></model-viewer>
               ) : (
                 <>
                   <img
