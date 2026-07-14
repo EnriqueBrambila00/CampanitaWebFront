@@ -94,6 +94,9 @@ export function Login() {
       if (!respuestaMfa.ok) throw new Error(dataMfa.error || 'Código incorrecto');
 
       // ¡LOGIN EXITOSO FINAL! Guardamos sesión
+      if (dataMfa.token) {
+        localStorage.setItem('token', dataMfa.token);
+      }
       localStorage.setItem('usuarioLogueado', 'true');
       if (dataMfa.esAdmin) {
         localStorage.setItem('esAdmin', 'true');

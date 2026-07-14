@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate,useLocation } from 'react-router-dom';
 import logoPiramide from '../assets/piramide.png';
+import { getAuthHeaders } from '../utils/auth';
 
 export function Navbar() {
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
@@ -16,6 +17,10 @@ export function Navbar() {
     const parametrosUrl = new URLSearchParams(location.search);
     
     if (parametrosUrl.get('oauth') === 'google') {
+      const tokenOauth = parametrosUrl.get('token');
+      if (tokenOauth) {
+        localStorage.setItem('token', tokenOauth);
+      }
       // 1. Le decimos a React que ya estamos logueados
       localStorage.setItem('usuarioLogueado', 'true');
       
@@ -43,6 +48,7 @@ export function Navbar() {
         try {
           // Hacemos un "ping" silencioso a una ruta protegida (la del perfil sirve perfecto)
           const res = await fetch('https://campanitaweb.onrender.com/api/perfil/telefono', {
+            headers: getAuthHeaders(),
             credentials: 'include' // Importante para enviar la cookie a ver si aún sirve
           });
 
@@ -51,6 +57,7 @@ export function Navbar() {
             console.log("Sesión expirada detectada. Limpiando frontend...");
             localStorage.removeItem('usuarioLogueado');
             localStorage.removeItem('esAdmin');
+            localStorage.removeItem('token');
             window.location.reload(); // Recargamos la página para limpiar la Navbar visualmente
           }
         } catch (error) {
@@ -69,6 +76,7 @@ export function Navbar() {
   const manejarCerrarSesion = () => {
     localStorage.removeItem('usuarioLogueado');
     localStorage.removeItem('esAdmin');
+    localStorage.removeItem('token');
     setMenuPerfilAbierto(false);
     setMenuAbierto(false); // Cerramos el menú de celular si estaba abierto
     navigate('/login');

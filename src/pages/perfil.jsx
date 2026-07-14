@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getAuthHeaders } from '../utils/auth';
 
 export function Perfil() {
   const [perfil, setPerfil] = useState({
@@ -22,7 +23,7 @@ export function Perfil() {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        const res = await fetch(`${URL_BACKEND}/api/perfil`, { credentials: 'include' });
+        const res = await fetch(`${URL_BACKEND}/api/perfil`, { headers: getAuthHeaders(), credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           setPerfil(data);
@@ -31,7 +32,7 @@ export function Perfil() {
           if (data.gamertag) setGamertag(data.gamertag);
         } else {
           // Fallback a ruta de teléfono por compatibilidad
-          const resTel = await fetch(`${URL_BACKEND}/api/perfil/telefono`, { credentials: 'include' });
+          const resTel = await fetch(`${URL_BACKEND}/api/perfil/telefono`, { headers: getAuthHeaders(), credentials: 'include' });
           if (resTel.ok) {
             const dataTel = await resTel.json();
             if (dataTel.telefono) setTelefono(dataTel.telefono);
@@ -71,7 +72,7 @@ export function Perfil() {
 
       const res = await fetch(`${URL_BACKEND}/api/perfil`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }),
         credentials: 'include',
         body: JSON.stringify({
           telefono,

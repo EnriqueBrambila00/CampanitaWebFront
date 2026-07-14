@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getAuthHeaders } from '../utils/auth';
 
 const globFiles = import.meta.glob('/public/modelos3d/*.glb', { query: '?url' });
 const modelosLocales = Object.keys(globFiles).map(path => path.replace('/public/modelos3d/', ''));
@@ -73,6 +74,7 @@ export function Dashboard() {
     try {
       const res = await fetch(`${URL_BACKEND}/api/admin/usuarios/${id}/banear`, {
         method: 'PUT',
+        headers: getAuthHeaders(),
         credentials: 'include'
       });
       if (res.ok) {
@@ -86,6 +88,7 @@ export function Dashboard() {
     try {
       const res = await fetch(`${URL_BACKEND}/api/admin/usuarios/${id}/reactivar`, {
         method: 'PUT',
+        headers: getAuthHeaders(),
         credentials: 'include'
       });
       if (res.ok) {
@@ -100,7 +103,7 @@ export function Dashboard() {
     try {
       const res = await fetch(`${URL_BACKEND}/api/admin/usuarios/${usuarioEditar.id_usuario}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         credentials: 'include',
         body: JSON.stringify(usuarioEditar)
       });
@@ -117,6 +120,7 @@ export function Dashboard() {
     try {
       const res = await fetch(`${URL_BACKEND}/api/admin/usuarios/${usuarioEliminar.id_usuario}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
         credentials: 'include'
       });
       if (res.ok) {
@@ -132,7 +136,7 @@ export function Dashboard() {
   // ==========================================
   const obtenerDatos = async (endpoint, setEstado) => {
     try {
-      const res = await fetch(`${URL_BACKEND}/${endpoint}`, { credentials: 'include' });
+      const res = await fetch(`${URL_BACKEND}/${endpoint}`, { headers: getAuthHeaders(), credentials: 'include' });
       if (res.ok) setEstado(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -148,7 +152,7 @@ export function Dashboard() {
 
       const res = await fetch(`${URL_BACKEND}/api/admin/${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         credentials: 'include',
         body: JSON.stringify(bodyData)
       });
@@ -163,7 +167,7 @@ export function Dashboard() {
     if (!confirm('¿Seguro que deseas eliminar este elemento?')) return;
     try {
       const res = await fetch(`${URL_BACKEND}/api/admin/${endpoint}/${id}`, {
-        method: 'DELETE', credentials: 'include'
+        method: 'DELETE', headers: getAuthHeaders(), credentials: 'include'
       });
       if (res.ok) {
         setMensaje('🗑️ Elemento eliminado.');
@@ -187,7 +191,7 @@ export function Dashboard() {
 
       const res = await fetch(url, {
         method: metodo,
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         credentials: 'include',
         body: JSON.stringify({
           titulo: tituloConTag,
@@ -241,6 +245,7 @@ export function Dashboard() {
     try {
       const res = await fetch(`${URL_BACKEND}/api/admin/upload`, {
         method: 'POST',
+        headers: getAuthHeaders(),
         credentials: 'include',
         body: formData
       });
