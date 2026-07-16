@@ -73,7 +73,15 @@ export function Navbar() {
   const usuarioAutenticado = localStorage.getItem('usuarioLogueado') === 'true';
   const esAdmin = localStorage.getItem('esAdmin') === 'true';
   
-  const manejarCerrarSesion = () => {
+  const manejarCerrarSesion = async () => {
+    try {
+      await fetch('https://campanitaweb.onrender.com/api/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error al notificar cierre de sesión al servidor:', error);
+    }
     localStorage.removeItem('usuarioLogueado');
     localStorage.removeItem('esAdmin');
     localStorage.removeItem('token');
